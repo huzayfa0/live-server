@@ -22,6 +22,7 @@ bot.setMyCommands([
   { command: '/restart', description: '🔁 IELTS botni qayta ishga tushirish' },
   { command: '/logs', description: '📜 IELTS botning oxirgi loglari' },
   { command: '/ip', description: '🌐 Mahalliy va Tashqi IP manzillar' },
+  { command: '/clock', description: '🕶 Hacker Soat animatsiyasi' },
   { command: '/help', description: 'ℹ️ Yordam va buyruqlar' }
 ]);
 
@@ -30,7 +31,8 @@ const mainKeyboard = {
     keyboard: [
       ["📊 Tizim holati", "🔄 IELTS botni yangilash"],
       ["⚡️ PM2 jarayonlar", "📜 IELTS bot loglari"],
-      ["🔁 IELTS botni qayta yoqish", "🌐 IP manzillar"]
+      ["🔁 IELTS botni qayta yoqish", "🌐 IP manzillar"],
+      ["🕶 Hacker Soat", "ℹ️ Yordam"]
     ],
     resize_keyboard: true
   }
@@ -214,6 +216,18 @@ bot.onText(/\/cmd (.+)/, async (msg, match) => {
   sendLongMessage(msg.chat.id, `💻 <b>NATIJA:</b>\n\n<pre>${result || "Buyruq muvaffaqiyatli bajarildi (hech qanday matn chiqmadi)."}</pre>`);
 });
 
+// --- /clock (HACKER SOAT) ---
+function handleClock(chatId) {
+  const clockText = `🕶 <b>KALI HACKER SOATI VA MONITORINGI</b>\n\n` +
+    `Ushbu animatsiyali hacker soatini Kali serveringiz ekraniga qo‘yish uchun:\n\n` +
+    `🖥 <b>1. Kali terminalida shunchaki quyidagi buyruqni bering:</b>\n` +
+    `<code>node ~/server-bot/clock.js</code>\n\n` +
+    `🟢 Ekranda katta yashil raqamlar, Matrix animatsiyasi, real-vaqtdagi RAM va Uptime monitori yonib turadi!\n\n` +
+    `⌨️ <b>Chiqish:</b> Serverda ishlash kerak bo‘lsa, shunchaki <b>Ctrl + C</b> tugmasini bossangiz, terminal darhol o‘z holiga qaytadi!`;
+
+  bot.sendMessage(chatId, clockText, { parse_mode: 'HTML' });
+}
+
 // --- TEXT TUGMALARNI QABUL QILISH ---
 bot.on('message', async (msg) => {
   const text = msg.text || '';
@@ -234,6 +248,10 @@ bot.on('message', async (msg) => {
     handleRestart(chatId);
   } else if (text === "🌐 IP manzillar") {
     handleIP(chatId);
+  } else if (text === "🕶 Hacker Soat") {
+    handleClock(chatId);
+  } else if (text === "ℹ️ Yordam") {
+    bot.sendMessage(chatId, "Quyidagi menyu orqali buyruqlarni berishingiz mumkin:", mainKeyboard);
   }
 });
 
@@ -244,6 +262,7 @@ bot.onText(/\/pm2/, (msg) => { if (isAdmin(msg)) handlePM2Status(msg.chat.id); }
 bot.onText(/\/restart/, (msg) => { if (isAdmin(msg)) handleRestart(msg.chat.id); });
 bot.onText(/\/logs/, (msg) => { if (isAdmin(msg)) handleLogs(msg.chat.id); });
 bot.onText(/\/ip/, (msg) => { if (isAdmin(msg)) handleIP(msg.chat.id); });
+bot.onText(/\/clock/, (msg) => { if (isAdmin(msg)) handleClock(msg.chat.id); });
 
 bot.onText(/\/help/, (msg) => {
   if (!isAdmin(msg)) return;
@@ -254,6 +273,7 @@ bot.onText(/\/help/, (msg) => {
     `• <b>🔁 Qayta yoqish</b> (/restart) — IELTS botini qayta ishga tushirish\n` +
     `• <b>📜 Loglar</b> (/logs) — Xatolik va loglarni ko‘rish\n` +
     `• <b>🌐 IP manzillar</b> (/ip) — Lokal va global IP\n` +
+    `• <b>🕶 Hacker Soat</b> (/clock) — Kali monitoriga hacker soatini qo‘yish\n` +
     `• <b>💻 /cmd &lt;buyruq&gt;</b> — Kali terminalida xohlagan buyruqni bajarish (masalan: <code>/cmd whoami</code> yoki <code>/cmd df -h</code>)`;
 
   bot.sendMessage(msg.chat.id, helpText, { parse_mode: 'HTML', ...mainKeyboard });
