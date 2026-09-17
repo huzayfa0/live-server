@@ -200,9 +200,7 @@ function render() {
   out += `   ${GREEN}│${RESET}  ⏱ UPTIME: ${WHITE}${upHours} soat, ${upMins} daqiqa${RESET}\n`;
   out += `   ${GREEN}│${RESET}  🛡 STATUS: ${BRIGHT_GREEN}FIREWALL ACTIVE // EXPRESS IELTS BOT RUNNING${RESET}\n`;
   out += `   ${GREEN}│${RESET}  💻 PLATFORMA: ${CYAN}${os.type()} ${os.arch()} (Linux Kernel ${os.release()})${RESET}\n`;
-  out += `   ${GREEN}└─────────────────────────────────────────────────────────────────────────────┘${RESET}\n\n`;
-
-  out += `   ${DARK_GREEN}⚡️ Ishlash uchun: ${WHITE}${BOLD}CTRL + C${RESET}${DARK_GREEN} ni bosing (Terminalga qaytish) ⚡️${RESET}\n`;
+  out += `   ${GREEN}└─────────────────────────────────────────────────────────────────────────────┘${RESET}\n`;
 
   process.stdout.write(out);
 }
