@@ -4,7 +4,7 @@ const os = require('os');
 
 // ANSI rang kodlari
 const GREEN = '\x1b[32m';
-const BRIGHT_GREEN = '\x1b[92m';
+const BRIGHT_GREEN = '\x1b[92;1m';
 const DARK_GREEN = '\x1b[38;5;22m';
 const CYAN = '\x1b[96m';
 const BRIGHT_CYAN = '\x1b[96;1m';
@@ -33,7 +33,7 @@ const font = {
   ' ': ['  ', '  ', '  ', '  ', '  ']
 };
 
-// 24 ta aylanuvchi Yer shari (Earth) freymlari (ascii.live/earth)
+// 24 ta aylanuvchi Yer shari freymlari (ascii.live/earth)
 const earthFrames = [["          ./sooo/.                ","       ~sdy+  :yyNh~              ","     -@-    :-@@@@@@@N:           ","    h       ~@- ::dNd@@N          ","  /       ~s@@@@@@@@y@N@@         ","+:       o@@@@@@@@@@Ny@@~@        ","h        y@@@@@@@@@@@@h-~.@       ","/N@~       yyy sN@@@@@@h~~s       ","+@@@N+          h@@@@@:~~~s       ","d@@@@/           @@@@@~~~~@       ","o:@@N           /@@@N.@~~s        ","  +@@            @@N~~~~.         ","    d.           .~~~~~y~         ","     :h          ~~~~s/           ","       .s+- ~::/+ys.              "],["          ./syoo/.                ","       ~syh+/  :hdh~              ","     -@d.     ~y@@@@@N:           ","    @~        @@ ~/dsNdN          ","  /          N@@@@@@@N@@@         ","+ -        /@@@@@@@@@@+@Ny        ","h ~        d@@@@@@@@@@@@-~@       ","/~@@o        yyy sN@@@@@@~s       ","+/@@@@++          @@@@@@.~s       ","d:@@@@@.           @@@@y~~@       ","o s@@@/          ~d@@@oN~s        ","  +/@@:           /@@s~~.         ","    hN-            .~~~y~         ","     :h          ~~~~s/           ","       .os-  ~:/+os.              "],["          ./syoo/.                ","       ~shoh+.  N@y~              ","     -@dh-     :y@@@@N:           ","    @s          @/ o+hN@          ","  /o          ~@@@@@@@N@N         ","+:           o@@@@@@@@@:@d        ","h/~~          @@@@@@@@@@N-@       ","/ -@@N.        syy .@@@@@hs       ","+ y@@@@@+/          @@@@@~s       ","d /@@@@@+           ~@@@/~@       ","o  @@@@@s          ~@@@/ds        ","  + /@@@           ~@@o~.         ","    h.@~          ~~.~~y~         ","     :s+         ~~~~s/           ","       .oo/   :/+os.              "],["         .+syoo+.                 ","       ~syydh+. /Ny~              ","     -@dNo~     :hNN@N:           ","    @@s          +@~-syN          ","  /h+           /@@@@@@@@         ","+o- s          s@@@@@@@@o@        ","h o~~.          @@@@@@@@@@@       ","/  :@@@@         shh.y@@@@h       ","+  @@@@@@@+/        ~~@@@Ns       ","d  y@@@@@@N         ~~@@@/@       ","o   .@@@@@.         ~-@@+@        ","  +  d@@@y          ~-@s.         ","    h  @h          ~~.~y~         ","     :s:o        ~~~~s/           ","       .o+o   ./+os.              "],["          ./syyo/.                ","       ~yhs Nh-.:hy~              ","     -NNh@os     ::@NN:           ","    @@@+           @:+sN          ","  /@y.            o@@@@@N         ","+o.              s@@@@@@@@        ","h  d~...         .@@@@@@@@@       ","/    @@@@d         .hh-@@@@       ","+   ~@@@@@@@+/       ~~y@@h       ","d   -@@@@@@@@/      ~~~~@@@       ","o     @@@@@@       ~~~~@@y        ","  +    @@@N:       ~~~-@+         ","    h  ~@@.       ~~~~~y~         ","     :s -d       ~~~~s/           ","       .o+-+  ~-+os.              "],["          ./oyyo/.                ","       ~ydo+ @+~:oy~              ","     -N@Nh@+y     ~oNN:           ","    @@@@N-         ~h.+@          ","  /d@sy             @@@@N         ","+ y s  d           s@@@@@@        ","h    /~...         s@@@@@@@       ","/     :@@@@d-       ~yh~y@@       ","+     @@@@@@@@++    ~~~~~@@       ","d     o@@@@@@@N/    ~~~~/@@       ","o      .@@@@@@h     ~~~~@@        ","  +     N@@@@       ~~~.N         ","    h    sN@       ~~~~y~         ","     :s   h      ~~~~s/           ","       .o+-/:  .+os.              "],["          ./ssys/.                ","       ~y@y+/~N+/os~              ","     -N@@h@@+y     ++N:           ","    h@@@@@:        ~~@:d          ","  /~@ds+-           ~o@@N         ","+  @-~   d          -N@@@@        ","h     @ ...~        ~@@@@@@       ","/       +@@@@@:      ~.hs@@       ","+       @@@@@@@@++   ~~~~s@       ","d       N@@@@@@@@:  ~~~~~o@       ","o        .@@@@@@o  ~.~~~.@        ","  +       @@@@@    ~~~~~o         ","    h     ~@@/    ~~~~~y~         ","     :s    N     ~~~~s/           ","       .o+-~/: ~/os.              "],["          ./ooys/.                ","       ~yN@+/:hN:so~              ","     -y@@@dd@@o.   ~+N:           ","    hh@@@@@@       ~~~dh          ","  / ~@@s+o          ~~s@@         ","+  ~:@ d   d        ~~+@@@        ","h       h~....      ~~~N@@@       ","/         s@@@@N:   ~~~~y.@       ","+         @@@@@@@@++~~~~~~@       ","d        ~o@@@@@@@@.~~~~~~@       ","o          .@@@@@@~ ~~~~~h        ","  +         @@@@h   ~~~~.         ","    h       @@@.   ~~~~y~         ","     :s     N.   ~~~~s/           ","       .o+-~.+~~:os.              "],["          ./osss/.                ","       ~y@dh+::s@os~              ","     -sy@@@@@N@dd  ~~y:           ","    h :@@@@@@@     ~~~~@          ","  /   :N@o+oo       ~~~~@         ","+     /@~-+   @     ~~~.@@        ","h          -~...~   ~~~~N@@       ","/            h@@@@y.~~~~~sy       ","+            @@@@@@@No~~~~s       ","d           :d@@@@@@@/~~~~@       ","o             -@@@@@o~~~~s        ","  +           h@@@@:~~~~.         ","    h         @@@-~~~~~y~         ","     :s       @. ~~~~s/           ","       .o+- ~~/::os.              "],["          ./ooos/.                ","       ~yNh@d+:/@hs~              ","     -s h@@@@oN@@o-~~y:           ","    h  s@@@@@@@y   ~~~~h          ","  /     s@@oooo     ~~~~/         ","+      -.@  -   d   ~~~~.@        ","h            d~....  ~~~~N@       ","/              y@@@@/~~~~~@       ","+              @@@@@@@o/~~s       ","d             -d@@@@@@N.~~@       ","o               -@@@@@.~~s        ","  +             @@@@y~~~.         ","    h           @@@~~~~y~         ","     :s        N.~~~~s/           ","       .o+-~~~:::os.              "],["          ./ooss/.                ","       ~y@ds@N:-sNs~              ","     -s  o@@@@+@@@o.~s:           ","    h    @@@@@@@@. ~~~~h          ","  /      +N@@o++:   ~~~~.         ","+        .o@  d  -/ ~~~~~d        ","h              d~....~~~~~@       ","/                h@@@@:~~~s       ","+                @@@@@@@s~s       ","d               -@@@@@@@.~@       ","o                 y@@@@.~s        ","  +              ~@@@@~~.         ","    h            -@@-~~y~         ","     :s         @o.~~s/           ","       .o+-~ ~./:os.              "],["          ./ooso/.                ","       ~yN@sdNy:hhy~              ","     -s~  h@@@@@@@@o-s:           ","    h     N@@@@@@@N~~~~h          ","  /        /h@@o++  ~~~~.         ","+          .h@. h  ~~~~~~y        ","h                @~..-~~~~@       ","/                  :@@@h~~s       ","+                  @@@@@@/s       ","d                  @@@@@@.@       ","o                  ~@@@N-s        ","  +                .@@h~.         ","    h             ~@d.~y~         ","     :s          -@.~s/           ","       .o+- ~ ~-/ss.              "],["          ./ooos/.                ","       ~s@Nsod@h/hy~              ","     -s    -@@@@@hN@os:           ","    h       @@@@@@@@.~~h          ","  /          +N@hoo/~~~~.         ","+            ..@ :/ ~d~~~y        ","h                  s.---~~@       ","/                   .h@@@~s       ","+                   :@@@@@s       ","d                   -@@@@N@       ","o                  ~.-@@Ns        ","  +                ~~@@d.         ","    d              ~sh.y~         ","     :s          ~~s.s/           ","       .o+- ~~~./ss.              "],["         .+oooo+.                 ","       ~sddhsod@yys~              ","     -s     :d@@@@h@Nh:           ","    h        +@@@@@@@~~h          ","  /            o@@os+-~~.         ","+              .:@ .~~~~~y        ","h                    .--.~@       ","/                    ~/@@hs       ","+                    ~@@@@@       ","d                   ~~s@@@@       ","o                  ~~.~@@N        ","  +                ~~~@@s         ","    h             ~~~hyy~         ","     :s          ~~/ss/           ","       .o+-  ~~./os.              "],["          ./ooso/.                ","       ~yhydyyhdNyy~              ","     -s       d@@@@y@d:           ","    h          @@@@@@@.h          ","  /             -y@@yy.~.         ","+                .h@~d~-~y        ","h                   ~.@...@       ","/                   ~~~~d@h       ","+                   ~~~~@@@       ","d                   ~~~.@@@       ","o                  ~~~~.@@        ","  +                 ~~~@@         ","    h-             ~~~yh~         ","     :s          ~~~/s/           ","       .o+-   ~.:os.              "],["          ./oooo/.                ","       ~y@oy@sd@NNs~              ","     -y~       +@@@@yN:           ","    h           s@@@@@@h          ","  /               +y@hy:.         ","+                  -@+.~-y        ","h                   ~~.~..@       ","/                    ~~~~@@       ","+~                   ~~~~@@       ","d                   ~~~~-@@       ","o.                 ~~~~~-@        ","  +~               ~~~~~N         ","    h ~           ~~~~~N~         ","     :s          ~~~~d/           ","       .o+-   ~~:os.              "],["          ./oooo/.                ","       ~y@h-s@sdNNy~              ","     -d-        -h@@@N:           ","    h              @@@@@          ","  /                 od@h:         ","+                   ~:@~:h        ","h                    ~~~.-@       ","/                   ~~~~~~@       ","+s                  ~~~~~~@       ","d+                  ~~~~~.@       ","o@~                 ~~~~~s        ","  +@.               ~~~~.         ","    h   o          ~~~~h~         ","     :s          ~~~~s/           ","       .oo-    .:os.              "],["          ./oooo/.                ","       ~y@@:.yhydNh~              ","     -N :         s@@N:           ","    d              ~@@@N          ","  /                 ~~@@h         ","+                   ~~-N.y        ","h                   ~~~~..@       ","/~                   ~~~~~y       ","+ s                 ~~~~~~y       ","dys                 ~~~~~~@       ","o@@                ~.~~~~s        ","  +@@              ~~~~~.         ","    ho            ~~~~~y~         ","     :s          ~~~~s/           ","       .so/    ~-os.              "],["          ./oooo/.                ","       ~y@@y:.@y@Ny~              ","     -Nh /        ~h@N:           ","    @~             ~~@@N          ","  /                 ~~~@@         ","+.                  ~~~/dh        ","h                    ~~~~.@       ","/~                  ~~~~~~s       ","+- +~               ~~~~~~s       ","d h-                ~~~~~~@       ","oN@N   ~            ~~~~~s        ","  +@@@o             ~~~~.         ","    h h    y       ~~~~y~         ","     :s   ~      ~~~~s/           ","       .ss/~   ~:os.              "],["          ./oooo/.                ","       ~y@Nyh:+d@Nh~              ","     -N@h -        -hN:           ","    @d             ~~~NN          ","  /y                ~~~~N         ","++~                 ~~~~/N        ","h                   ~~~~~~@       ","//                  ~~~~~~s       ","+-~ d/              ~~~~~~s       ","d  sy               ~~~~~~@       ","o @N@h   ~         ~.~~~~s        ","  +N@@@@           ~~~~~.         ","    h  d    :     ~~~~~y~         ","     :s    .     ~~~~s/           ","       .oy+:   ~:os.              "],["          ./oooo/.                ","       ~y@@@sh:odNy~              ","     -@@@N /       ~/N:           ","    @@@            ~~~.N          ","  /@y               ~~~~/         ","+y-                 ~~~~~y        ","hy                   ~~~~~@       ","/:o~                ~~~~~~s       ","+/-  @++            ~~~~~~s       ","d   y./             ~~~~~~@       ","o ~@@@@    ~        ~.~~~s        ","  +~@@@@@N         ~~~~~.         ","    h  ~d/    s    ~~~~y~         ","     :s     ~~   ~~~~s/           ","       .ssy:-  ~-os.              "],["          ./oooo/.                ","       ~y@@d@ss:NNh~              ","     -NN@@@ /     ~~.d:           ","    @@@@           ~~~~@          ","  /@@+              ~~~~-         ","+Ns ~               ~~~~~y        ","hso                 ~~~~~~@       ","/..@ .              ~.~~~~s       ","+ : :  N+:          ~.~~~~s       ","d     y             ~~~~~~@       ","o  -@@NN@    ~     ~.~~~~s        ","  +  @@@@@@-       ~~~~~.         ","    h    -@       ~~~~~y~         ","     :s       ~  ~~~~s/           ","       .sso/:. ~-os.              "],["          ./oooo/.                ","       ~y@@@N@hssNh~              ","     -N@N@@@       ~~y:           ","    @@@@o:         ~~~~h          ","  /@@@y             ~~~~.         ","+s@@-.              ~~~~~y        ","h d.                 ~~~~~@       ","/ :~:  -             ~~~~~s       ","+  .oo   @+-~       ~~~~~~s       ","d      o+:+         ~~~~~~@       ","o    h@@@@d    .   ~~.~~~s        ","  +  ~@@@@@@@      ~~~~~.         ","    h     .@-    o ~~~~y~         ","     :s        . ~~~~s/           ","       .sh+s/: ~-os.              "],["          ./oooo/.                ","       ~y@@@@@yyydh~              ","     -N@@@@@@/ -   ~~s:           ","    @@@@@dh        ~~~~h          ","  /@@@@@:           ~~~~.         ","+@/@:h .            ~~~~~y        ","h/ N@               ~~~~~~@       ","/  :/:@ .~          ~.~~~~s       ","+   +-~o   @+:~     ~.~~~~s       ","d        ys+/       ~~~~~~@       ","o     ~N@@N@d    . ~.~~~~s        ","  +    o@@@@@@@    ~~~~~.         ","    h   ~   s@~   ~.~~~y~         ","     :s         ~.~~~s/           ","       .shy+s:-~-os.              "]];
 
 // Kursorni yashirish
@@ -46,15 +46,27 @@ process.on('SIGINT', () => {
   process.exit(0);
 });
 
+// ANSI belgilarni tozalab real ko'rinadigan uzunlikni o'lchash
+function stripAnsi(str) {
+  return str.replace(/\x1b\[[0-9;]*m/g, '');
+}
+
+// Aniq ko'rinadigan kenglik bo'yicha to'ldirish (padding)
+function padVisual(str, targetWidth) {
+  const visibleLen = stripAnsi(str).length;
+  if (visibleLen >= targetWidth) return str;
+  return str + ' '.repeat(targetWidth - visibleLen);
+}
+
 // ProgressBar yasash
-function createBar(percent, length = 15, color = BRIGHT_GREEN) {
-  const filled = Math.round((percent / 100) * length);
+function createBar(percent, length = 12, color = BRIGHT_GREEN) {
+  const filled = Math.max(0, Math.min(length, Math.round((percent / 100) * length)));
   const empty = length - filled;
   return color + '█'.repeat(filled) + DARK_GREEN + '░'.repeat(empty) + RESET;
 }
 
 // Tasodifiy matrix oqimi
-function getMatrixStream(len = 92) {
+function getMatrixStream(len = 96) {
   const chars = '01アイウエオカキクケコサシスセソタチツテト01010101XYZ#%@*';
   let str = '';
   for (let i = 0; i < len; i++) {
@@ -68,6 +80,24 @@ function getMatrixStream(len = 92) {
     }
   }
   return str;
+}
+
+// Yer sharini rangli qilish (Quruqlik - Yashil, Okean - Moviy/Moviy-yashil)
+const landChars = new Set(['@', 'N', 'd', 'h', 'y', 's', 'm', 'b', 'q', 'p', 'w', 'Z', 'Y']);
+const oceanChars = new Set(['.', '-', '~', '/', '+', ':', 'o', '*']);
+
+function colorizeEarthLine(line) {
+  let res = '';
+  for (let ch of line) {
+    if (landChars.has(ch)) {
+      res += BRIGHT_GREEN + ch; // Quruqlik / Qit'alar (Yashil)
+    } else if (oceanChars.has(ch)) {
+      res += CYAN + ch; // Okeanlar (Moviy)
+    } else {
+      res += RESET + ch;
+    }
+  }
+  return res + RESET;
 }
 
 // Mahalliy IP ni topish
@@ -110,7 +140,7 @@ function getCpuPercent() {
 let tick = 0;
 const localIp = getLocalIp();
 const cpuRaw = os.cpus()[0]?.model || 'Multi-Core Processor';
-const cpuModel = cpuRaw.split('@')[0].trim().slice(0, 26);
+const cpuModel = cpuRaw.split('@')[0].trim().slice(0, 24);
 const cpuCores = os.cpus().length;
 
 function render() {
@@ -149,62 +179,73 @@ function render() {
   const days = ['Yakshanba', 'Dushanba', 'Seshanba', 'Chorshanba', 'Payshanba', 'Juma', 'Shanba'];
   const dateStr = now.getDate() + '-' + months[now.getMonth()] + ', ' + now.getFullYear() + ' // ' + days[now.getDay()];
 
-  // Aylanuvchi Yer shari freymi (har tick'da aylanadi)
+  // Aylanuvchi Yer shari freymi (har tick'da 1 ta aylanadi)
   const earthIndex = tick % earthFrames.length;
-  const earthLines = earthFrames[earthIndex];
+  const currentEarthFrame = earthFrames[earthIndex];
 
-  // Jonli tarmoq ko'rsatkichlari (simulyatsiya)
+  // Jonli tarmoq ko'rsatkichlari
   const netRx = (2.4 + (tick % 7) * 0.4).toFixed(1);
   const netTx = (1.1 + (tick % 5) * 0.3).toFixed(1);
 
-  // Chap tomon (Server Telemetriya qatorlari - 15 qator)
-  const ramBar = createBar(ramPercent, 14, CYAN);
-  const cpuBar = createBar(cpuPercent, 14, YELLOW);
+  // Chap tomon (Server Telemetriya qutisi - aniq 54 belgi kenglikda)
+  const ramBar = createBar(ramPercent, 12, CYAN);
+  const cpuBar = createBar(cpuPercent, 12, YELLOW);
 
   const leftTelemetry = [
     GREEN + '┌──[ ' + WHITE + BOLD + 'SERVER TELEMETRIYA' + RESET + GREEN + ' ]────────────────────────────┐' + RESET,
-    GREEN + '│' + RESET + '  🧠 ' + BOLD + 'RAM:' + RESET + '   [' + ramBar + '] ' + CYAN + ramPercent + '%' + RESET + ' (' + Math.round(usedMem / 1024 / 1024) + 'M/' + Math.round(totalMem / 1024 / 1024) + 'M)',
-    GREEN + '│' + RESET + '  ⚡️ ' + BOLD + 'CPU:' + RESET + '   [' + cpuBar + '] ' + YELLOW + cpuPercent + '%' + RESET + ' (' + cpuCores + ' Cores)',
-    GREEN + '│' + RESET + '  ⚙️ ' + BOLD + 'CHIP:' + RESET + '  ' + WHITE + cpuModel + RESET,
-    GREEN + '│' + RESET + '  ⏱ ' + BOLD + 'UPTIME:' + RESET + ' ' + WHITE + upHours + 's, ' + upMins + 'm, ' + upSecs + 's' + RESET,
-    GREEN + '│' + RESET + '  🌐 ' + BOLD + 'LAN IP:' + RESET + ' ' + BRIGHT_CYAN + localIp + RESET,
-    GREEN + '│' + RESET + '  📡 ' + BOLD + 'TRAFFIC:' + RESET + ' RX: ' + WHITE + netRx + ' MB/s' + RESET + ' | TX: ' + WHITE + netTx + ' MB/s' + RESET,
+    GREEN + '│' + RESET + '  🧠 ' + BOLD + 'RAM:' + RESET + '      [' + ramBar + '] ' + CYAN + ramPercent + '%' + RESET + ' (' + Math.round(usedMem / 1024 / 1024) + 'M/' + Math.round(totalMem / 1024 / 1024) + 'M)',
+    GREEN + '│' + RESET + '  ⚡️ ' + BOLD + 'CPU:' + RESET + '      [' + cpuBar + '] ' + YELLOW + cpuPercent + '%' + RESET + ' (' + cpuCores + ' Cores)',
+    GREEN + '│' + RESET + '  ⚙️ ' + BOLD + 'CHIP:' + RESET + '     ' + WHITE + cpuModel + RESET,
+    GREEN + '│' + RESET + '  ⏱ ' + BOLD + 'UPTIME:' + RESET + '   ' + WHITE + upHours + 's, ' + upMins + 'm, ' + upSecs + 's' + RESET,
+    GREEN + '│' + RESET + '  🌐 ' + BOLD + 'LAN IP:' + RESET + '   ' + BRIGHT_CYAN + localIp + RESET,
+    GREEN + '│' + RESET + '  📡 ' + BOLD + 'TRAFFIC:' + RESET + '  RX: ' + WHITE + netRx + ' MB/s' + RESET + ' | TX: ' + WHITE + netTx + ' MB/s' + RESET,
     GREEN + '│' + RESET + '  🛡 ' + BOLD + 'FIREWALL:' + RESET + ' ' + BRIGHT_GREEN + 'ACTIVE [PROTECTED]' + RESET,
     GREEN + '│' + RESET + '  🤖 ' + BOLD + 'PM2 BOTS:' + RESET + ' ' + BRIGHT_GREEN + 'ONLINE [2/2 RUNNING]' + RESET,
     GREEN + '│' + RESET + '  🔒 ' + BOLD + 'SSH PORT:' + RESET + ' ' + CYAN + '22 [ENCRYPTED]' + RESET,
-    GREEN + '│' + RESET + '  📍 ' + BOLD + 'LOCATION:' + RESET + ' ' + WHITE + 'UZBEKISTAN // TASHKENT' + RESET,
-    GREEN + '│' + RESET + '  💾 ' + BOLD + 'OS KERNEL:' + RESET + ' ' + WHITE + os.type() + ' ' + os.arch() + RESET,
+    GREEN + '│' + RESET + '  📍 ' + BOLD + 'REGION:' + RESET + '   ' + WHITE + 'UZBEKISTAN // TASHKENT' + RESET,
+    GREEN + '│' + RESET + '  💾 ' + BOLD + 'PLATFORM:' + RESET + ' ' + WHITE + os.type() + ' ' + os.arch() + RESET,
     GREEN + '│' + RESET + '  ⚡️ ' + BOLD + 'SECURITY:' + RESET + ' ' + BRIGHT_GREEN + 'ZERO THREAT DETECTED' + RESET,
     GREEN + '│' + RESET + '  🎯 ' + BOLD + 'IELTS BOT:' + RESET + ' ' + BRIGHT_GREEN + 'ACTIVE & LISTENING' + RESET,
+    GREEN + '│' + RESET + '  STATUS:    ' + BRIGHT_GREEN + '24/7 CONTINUOUS SURVEILLANCE' + RESET,
     GREEN + '└─────────────────────────────────────────────────────┘' + RESET
+  ];
+
+  // O'ng tomon: Aylanuvchi Yer shari qutisi
+  const rightEarthBox = [
+    GREEN + '┌──[ ' + CYAN + BOLD + '🌍 PLANET EARTH // LIVE ROTATION' + RESET + GREEN + ' ]──┐' + RESET,
+    ...currentEarthFrame.map(line => {
+      const colored = colorizeEarthLine(line);
+      return GREEN + '│ ' + RESET + padVisual(colored, 36) + GREEN + ' │' + RESET;
+    }),
+    GREEN + '└────────────────────────────────────────┘' + RESET
   ];
 
   let out = CLEAR;
 
   // 1. Sarlavha (Header HUD)
-  out += GREEN + '╔══════════════════════════════════════════════════════════════════════════════════════════════╗' + RESET + '\n';
-  out += GREEN + '║  ' + BRIGHT_GREEN + BOLD + '[●] KALI CYBER TERMINAL' + RESET + '  ' + DARK_GREEN + '//' + RESET + '  ' + CYAN + 'NODE: ' + os.hostname() + RESET + '  ' + DARK_GREEN + '//' + RESET + '  ' + YELLOW + 'SYSTEM: 24/7 ONLINE' + RESET + '  ' + GREEN + '║' + RESET + '\n';
-  out += GREEN + '╚══════════════════════════════════════════════════════════════════════════════════════════════╝' + RESET + '\n\n';
+  out += GREEN + '╔══════════════════════════════════════════════════════════════════════════════════════════════════════╗' + RESET + '\n';
+  out += GREEN + '║  ' + BRIGHT_GREEN + BOLD + '[●] KALI CYBER TERMINAL' + RESET + '  ' + DARK_GREEN + '//' + RESET + '  ' + CYAN + 'NODE: ' + os.hostname() + RESET + '  ' + DARK_GREEN + '//' + RESET + '  ' + YELLOW + 'SYSTEM: 24/7 ONLINE' + RESET + '  ' + DARK_GREEN + '//' + RESET + '  ' + BRIGHT_GREEN + 'SHIELD: ON' + RESET + '  ' + GREEN + '║' + RESET + '\n';
+  out += GREEN + '╚══════════════════════════════════════════════════════════════════════════════════════════════════════╝' + RESET + '\n\n';
 
   // 2. Matrix Stream 1
-  out += '  ' + getMatrixStream(88) + '\n\n';
+  out += '  ' + getMatrixStream(98) + '\n\n';
 
-  // 3. Soat (Katta yashil raqamlar)
+  // 3. Soat (Markazda katta raqamlar)
   for (const line of clockLines) {
     out += '   ' + BRIGHT_GREEN + BOLD + line + RESET + '\n';
   }
   out += '\n   ' + CYAN + BOLD + '>>> ' + dateStr.toUpperCase() + ' <<<' + RESET + '\n\n';
 
   // 4. Matrix Stream 2
-  out += '  ' + getMatrixStream(88) + '\n\n';
+  out += '  ' + getMatrixStream(98) + '\n\n';
 
-  // 5. Yonma-yon: Chapda boyitilgan Telemetriya | O'ngda Aylanuvchi Yer shari (Earth)
-  for (let i = 0; i < 15; i++) {
-    const leftPart = leftTelemetry[i] || ' '.repeat(55);
-    const earthPart = earthLines[i] || '';
-    out += ' ' + leftPart + '  ' + BRIGHT_CYAN + earthPart + RESET + '\n';
+  // 5. Yonma-yon: Chapda Telemetriya | O'ngda aniq ramkali Aylanuvchi Rangli Yer Shari!
+  const maxRows = Math.max(leftTelemetry.length, rightEarthBox.length);
+  for (let i = 0; i < maxRows; i++) {
+    const left = padVisual(leftTelemetry[i] || '', 55);
+    const right = rightEarthBox[i] || '';
+    out += ' ' + left + '   ' + right + '\n';
   }
-  out += ' '.repeat(58) + CYAN + BOLD + '[ 🌍 PLANET EARTH // ORBIT 24/7 ]' + RESET + '\n';
 
   process.stdout.write(out);
 }
@@ -212,5 +253,5 @@ function render() {
 // Boshlanishida render qilish
 render();
 
-// Har 500ms (yarim sekundda) silliq aylanish
-setInterval(render, 500);
+// Har 400ms (har sekundda 2.5 qadam) silliq aylanish
+setInterval(render, 400);
