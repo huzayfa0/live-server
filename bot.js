@@ -4,7 +4,7 @@ const { exec } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
-const token = process.env.TELEGRAM_BOT_TOKEN;
+const token = process.env.TELEGRAM_BOT_TOKEN || '8595048507:AAGMvpzIVzskPXSAOuoqome_mvOhq8Bx6cc';
 let ADMIN_ID = process.env.ADMIN_ID ? process.env.ADMIN_ID.trim() : null;
 
 if (!token) {
