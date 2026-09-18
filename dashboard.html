@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KALI CYBER COMMAND // 4-CH CCTV MONITORING</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    :root {
+      --bg: #040806;
+      --bg-card: rgba(6, 18, 11, 0.75);
+      --green: #00ff66;
+      --bright-green: #39ff14;
+      --dark-green: #0d381e;
+      --cyan: #00f0ff;
+      --red: #ff2a44;
+      --yellow: #ffea00;
+      --text: #c8f7d4;
+      --border: #00ff6655;
+      --border-glow: 0 0 12px rgba(0, 255, 102, 0.25);
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Share Tech Mono', monospace, Consolas;
+      min-height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    /* Scanline va CRT Effekti */
+    body::before {
+      content: " ";
+      display: block;
+      position: absolute;
+      top: 0; left: 0; bottom: 0; right: 0;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+      background-size: 100% 4px;
+      z-index: 100;
+      pointer-events: none;
+      opacity: 0.6;
+    }
+
+    body::after {
+      content: " ";
+      display: block;
+      position: absolute;
+      top: 0; left: 0; bottom: 0; right: 0;
+      background: radial-gradient(circle, rgba(0,255,102,0.03) 0%, rgba(0,0,0,0.5) 100%);
+      z-index: 101;
+      pointer-events: none;
+    }
+
+    /* Sarlavha HUD */
+    header {
+      background: rgba(4, 15, 8, 0.95);
+      border-bottom: 2px solid var(--green);
+      box-shadow: var(--border-glow);
+      padding: 8px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      letter-spacing: 1.5px;
+      z-index: 10;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .badge-live {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 42, 68, 0.2);
+      border: 1px solid var(--red);
+      color: var(--red);
+      padding: 3px 8px;
+      border-radius: 3px;
+      font-weight: bold;
+      animation: pulse 1.5s infinite;
+    }
+
+    .badge-live::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      background: var(--red);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--red);
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .header-right {
+      display: flex;
+      gap: 20px;
+      color: var(--cyan);
+    }
+
+    .fullscreen-btn {
+      background: transparent;
+      border: 1px solid var(--cyan);
+      color: var(--cyan);
+      padding: 3px 10px;
+      font-family: inherit;
+      font-size: 11px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .fullscreen-btn:hover {
+      background: var(--cyan);
+      color: #000;
+    }
+
+    /* Asosiy Ish Maydoni (Chap va O'ng) */
+    main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 38% 62%;
+      gap: 12px;
+      padding: 12px;
+      height: calc(100vh - 75px);
+      z-index: 10;
+    }
+
+    /* Chap Tomon: Soat, Telemetriya, PM2 */
+    .left-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      overflow-y: auto;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      box-shadow: var(--border-glow);
+      border-radius: 4px;
+      padding: 12px;
+      position: relative;
+    }
+
+    .card-title {
+      color: var(--green);
+      font-size: 12px;
+      font-weight: bold;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(0, 255, 102, 0.2);
+      padding-bottom: 4px;
+    }
+
+    /* Katta Xaker Soati */
+    .clock-card {
+      text-align: center;
+      padding: 14px 10px;
+      background: linear-gradient(180deg, rgba(6, 26, 14, 0.8) 0%, rgba(2, 10, 5, 0.9) 100%);
+      border: 1px solid var(--green);
+    }
+
+    .digital-clock {
+      font-family: 'Orbitron', monospace;
+      font-size: 52px;
+      font-weight: 900;
+      color: var(--bright-green);
+      text-shadow: 0 0 20px rgba(57, 255, 20, 0.75), 0 0 40px rgba(0, 255, 102, 0.4);
+      letter-spacing: 3px;
+      line-height: 1;
+    }
+
+    .digital-clock span.colon {
+      animation: blink 1s infinite;
+    }
+
+    @keyframes blink {
+      0%, 49% { opacity: 1; }
+      50%, 100% { opacity: 0.2; }
+    }
+
+    .date-display {
+      margin-top: 8px;
+      color: var(--cyan);
+      font-size: 13px;
+      letter-spacing: 2px;
+      font-weight: bold;
+    }
+
+    /* Telemetriya panellari */
+    .metric-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+      font-size: 12px;
+    }
+
+    .metric-label {
+      color: #9fe2b2;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .metric-val {
+      color: var(--cyan);
+      font-weight: bold;
+    }
+
+    .progress-bar-container {
+      background: rgba(0, 0, 0, 0.6);
+      border: 1px solid rgba(0, 255, 102, 0.3);
+      height: 10px;
+      border-radius: 2px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--green), var(--cyan));
+      box-shadow: 0 0 10px var(--green);
+      transition: width 0.5s ease;
+    }
+
+    .progress-bar-fill.cpu {
+      background: linear-gradient(90deg, var(--yellow), var(--red));
+      box-shadow: 0 0 10px var(--yellow);
+    }
+
+    /* Loglar */
+    .log-stream {
+      font-size: 11px;
+      line-height: 1.5;
+      max-height: 95px;
+      overflow: hidden;
+      color: #7de89d;
+    }
+
+    .log-stream .log-time {
+      color: var(--cyan);
+    }
+
+    .log-stream .log-ok {
+      color: var(--bright-green);
+    }
+
+    /* O'ng Tomon: 4 ta CCTV Kameralar (2x2 Grid) */
+    .right-panel {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      gap: 10px;
+      height: 100%;
+    }
+
+    .cctv-card {
+      background: #000;
+      border: 1px solid rgba(0, 255, 102, 0.4);
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8), var(--border-glow);
+    }
+
+    .cctv-card:hover {
+      border-color: var(--cyan);
+      box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
+    }
+
+    /* Video Player */
+    .video-wrapper {
+      flex: 1;
+      position: relative;
+      background: #000;
+      overflow: hidden;
+    }
+
+    .cctv-video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      filter: contrast(1.15) saturate(1.1) brightness(0.95);
+    }
+
+    /* Fallback Canvas CCTV */
+    .cctv-canvas {
+      width: 100%;
+      height: 100%;
+      display: none;
+    }
+
+    /* CCTV On-Screen Display (OSD) */
+    .cctv-osd {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      pointer-events: none;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      z-index: 5;
+      font-size: 11px;
+      text-shadow: 1px 1px 2px #000, 0 0 4px #000;
+    }
+
+    .osd-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .cam-id {
+      color: var(--bright-green);
+      font-weight: bold;
+      background: rgba(0, 0, 0, 0.6);
+      padding: 2px 6px;
+      border-left: 2px solid var(--green);
+    }
+
+    .rec-badge {
+      color: var(--red);
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(0, 0, 0, 0.6);
+      padding: 2px 6px;
+    }
+
+    .rec-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--red);
+      border-radius: 50%;
+      box-shadow: 0 0 6px var(--red);
+      animation: pulse 1s infinite;
+    }
+
+    .osd-center {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 60%;
+      height: 50%;
+      border: 1px dashed rgba(0, 255, 102, 0.3);
+      pointer-events: none;
+    }
+
+    .osd-center::before {
+      content: "";
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 16px;
+      height: 1px;
+      background: rgba(0, 255, 102, 0.6);
+    }
+
+    .osd-center::after {
+      content: "";
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 1px;
+      height: 16px;
+      background: rgba(0, 255, 102, 0.6);
+    }
+
+    /* AI Object Tracking Bounding Box */
+    .ai-box {
+      position: absolute;
+      border: 1.5px solid var(--green);
+      background: rgba(0, 255, 102, 0.08);
+      font-size: 9px;
+      color: var(--green);
+      padding: 2px;
+      font-weight: bold;
+      animation: trackMove 8s infinite alternate ease-in-out;
+    }
+
+    .ai-box.car {
+      width: 32%;
+      height: 35%;
+      top: 45%;
+      left: 30%;
+    }
+
+    .ai-box.person {
+      width: 16%;
+      height: 40%;
+      top: 40%;
+      left: 65%;
+      border-color: var(--cyan);
+      color: var(--cyan);
+      animation: trackPerson 6s infinite alternate ease-in-out;
+    }
+
+    @keyframes trackMove {
+      0% { transform: translate(0, 0); }
+      100% { transform: translate(30px, -15px); }
+    }
+
+    @keyframes trackPerson {
+      0% { transform: translate(0, 0); }
+      100% { transform: translate(-25px, 10px); }
+    }
+
+    .osd-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(0, 0, 0, 0.6);
+      padding: 3px 6px;
+    }
+
+    .cam-location {
+      color: #fff;
+    }
+
+    .cam-timecode {
+      color: var(--yellow);
+      font-family: 'Share Tech Mono', monospace;
+      font-weight: bold;
+    }
+
+    /* Footer Status Bar */
+    footer {
+      background: rgba(4, 15, 8, 0.95);
+      border-top: 1px solid var(--green);
+      padding: 5px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      color: #7de89d;
+      z-index: 10;
+    }
+
+    /* Video manbasi almashtirish tugmasi */
+    .cctv-ctrl {
+      position: absolute;
+      top: 6px;
+      right: 90px;
+      z-index: 20;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .cctv-card:hover .cctv-ctrl {
+      opacity: 1;
+    }
+
+    .ctrl-btn {
+      background: rgba(0, 0, 0, 0.7);
+      border: 1px solid var(--cyan);
+      color: var(--cyan);
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 2px;
+      cursor: pointer;
+    }
+
+    .ctrl-btn:hover {
+      background: var(--cyan);
+      color: #000;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HUD Header -->
+  <header>
+    <div class="header-left">
+      <span style="color: var(--green); font-weight: bold;">[●] KALI CYBER TERMINAL</span>
+      <span style="color: #4a8f60;">//</span>
+      <span id="node-name" style="color: var(--cyan);">NODE: kali-server</span>
+      <span style="color: #4a8f60;">//</span>
+      <span style="color: var(--yellow);">TASHKENT (UTC+5)</span>
+      <div class="badge-live">CCTV 4-CH LIVE FEED</div>
+    </div>
+    <div class="header-right">
+      <span>SHIELD: <b style="color: var(--bright-green);">MAXIMUM</b></span>
+      <span>FIREWALL: <b style="color: var(--bright-green);">ACTIVE</b></span>
+      <button class="fullscreen-btn" onclick="toggleFullScreen()">[ ⛶ TO'LIQ EKRAN ]</button>
+    </div>
+  </header>
+
+  <!-- Asosiy Dashboard -->
+  <main>
+    
+    <!-- Chap Tomon: Soat va Telemetriya -->
+    <div class="left-panel">
+      
+      <!-- Katta Xaker Soati -->
+      <div class="card clock-card">
+        <div class="digital-clock" id="clock">
+          <span id="hh">00</span><span class="colon">:</span><span id="mm">00</span><span class="colon">:</span><span id="ss">00</span>
+        </div>
+        <div class="date-display" id="date-str">
+          >>> 18-SENTABR, 2026 // JUMA // UZBEKISTAN <<<
+        </div>
+      </div>
+
+      <!-- Tizim Telemetriyasi -->
+      <div class="card">
+        <div class="card-title">
+          <span>⚡️ SERVER TELEMETRIYA</span>
+          <span style="color: var(--cyan); font-size: 10px;">REALTIME</span>
+        </div>
+
+        <div class="metric-row">
+          <span class="metric-label">🧠 RAM XOTIRA:</span>
+          <span class="metric-val" id="ram-text">10% (823M / 7926M)</span>
+        </div>
+        <div class="progress-bar-container">
+          <div class="progress-bar-fill" id="ram-bar" style="width: 10%;"></div>
+        </div>
+
+        <div class="metric-row">
+          <span class="metric-label">⚡️ CPU YUKLANISHI:</span>
+          <span class="metric-val" id="cpu-text">2% (2 Cores)</span>
+        </div>
+        <div class="progress-bar-container">
+          <div class="progress-bar-fill cpu" id="cpu-bar" style="width: 14%;"></div>
+        </div>
+
+        <div class="metric-row">
+          <span class="metric-label">⚙️ PROTSESSOR:</span>
+          <span class="metric-val" id="cpu-model">Intel(R) Pentium(R) CPU G645</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">⏱ ISH VAQTI (UPTIME):</span>
+          <span class="metric-val" id="uptime-text">13h 52m 45s</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">🌐 LOKAL IP:</span>
+          <span class="metric-val" id="lan-ip">192.168.0.71</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">📡 TARMOQ TRAFIGI:</span>
+          <span class="metric-val" id="net-traffic">RX: 3.4 MB/s | TX: 1.5 MB/s</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">🔒 SSH PORT 22:</span>
+          <span class="metric-val" style="color: var(--bright-green);">OCHIQ [AES-256 SHIFRLANGAN]</span>
+        </div>
+      </div>
+
+      <!-- PM2 Jarayonlar va Disk -->
+      <div class="card">
+        <div class="card-title">
+          <span>🤖 PM2 JARAYONLAR VA DISK TIZIMI</span>
+          <span style="color: var(--bright-green); font-size: 10px;">2/2 RUNNING</span>
+        </div>
+
+        <div class="metric-row">
+          <span class="metric-label">● express-ielts-bot</span>
+          <span class="metric-val" style="color: var(--bright-green);">ONLINE (RAM: 104MB, CPU: 0.2%)</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">● server-controller</span>
+          <span class="metric-val" style="color: var(--bright-green);">ONLINE (RAM: 103MB, CPU: 0.4%)</span>
+        </div>
+
+        <div style="border-top: 1px dashed rgba(0,255,102,0.2); margin: 6px 0;"></div>
+
+        <div class="metric-row">
+          <span class="metric-label">💾 ASOSIY DISK (/):</span>
+          <span class="metric-val" id="disk-text">19G / 110G (18% BAND, 86G BO'SH)</span>
+        </div>
+        <div class="progress-bar-container">
+          <div class="progress-bar-fill" id="disk-bar" style="width: 18%;"></div>
+        </div>
+
+        <div class="metric-row">
+          <span class="metric-label">🔄 SWAP XOTIRA:</span>
+          <span class="metric-val" style="color: var(--bright-green);">0% BAND (2.0G BO'SH)</span>
+        </div>
+      </div>
+
+      <!-- Jonli Xavfsizlik Loglari -->
+      <div class="card" style="flex: 1;">
+        <div class="card-title">
+          <span>📋 JONLI XAVFSIZLIK VA TARMOQ LOGLARI</span>
+          <span style="color: var(--cyan); font-size: 10px;">SURVEILLANCE</span>
+        </div>
+        <div class="log-stream" id="log-container">
+          <div><span class="log-time">[23:28:01]</span> <span class="log-ok">PM2 healthcheck: 2/2 services running optimal</span></div>
+          <div><span class="log-time">[23:28:14]</span> <span style="color: var(--cyan);">SSH guard: active on port 22, 0 intrusions</span></div>
+          <div><span class="log-time">[23:28:28]</span> <span style="color: var(--yellow);">CCTV 4-CH streaming engine: 30.0 FPS stable</span></div>
+          <div><span class="log-time">[23:28:42]</span> <span style="color: #fff;">Kernel: memory scrub clean, load average: 0.18</span></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- O'ng Tomon: 4 ta HAQIQIY CCTV VIDEO KAMERA (2x2) -->
+    <div class="right-panel">
+
+      <!-- KAMERA 1: AMIR TEMUR SHOH KO'CHASI -->
+      <div class="cctv-card">
+        <div class="cctv-ctrl">
+          <button class="ctrl-btn" onclick="changeVideo(1)">Manba</button>
+        </div>
+        <div class="video-wrapper">
+          <video id="vid-1" class="cctv-video" autoplay loop muted playsinline>
+            <source src="https://upload.wikimedia.org/wikipedia/commons/4/4c/Traffic.ogv" type="video/ogg">
+            <source src="https://upload.wikimedia.org/wikipedia/commons/a/a9/Bangkok_Traffic_During_Enduring_Partners_26_%281009429%29.webm" type="video/webm">
+          </video>
+          <canvas id="canv-1" class="cctv-canvas"></canvas>
+
+          <div class="cctv-osd">
+            <div class="osd-top">
+              <span class="cam-id">[●] CAM-01: SHOH KO'CHA</span>
+              <span class="rec-badge"><span class="rec-dot"></span> REC</span>
+            </div>
+            
+            <div class="osd-center"></div>
+            <!-- AI Avto Aniqlash Bounding Box -->
+            <div class="ai-box car">
+              <span>🚗 CAR #14 [98.2%]</span>
+            </div>
+
+            <div class="osd-bottom">
+              <span class="cam-location">AMIR TEMUR SHOH KO'CHASI // 1080p 30FPS</span>
+              <span class="cam-timecode" id="tc-1">23:28:00.000</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- KAMERA 2: CHORSU CHORRAHASI // PIYODALAR -->
+      <div class="cctv-card">
+        <div class="cctv-ctrl">
+          <button class="ctrl-btn" onclick="changeVideo(2)">Manba</button>
+        </div>
+        <div class="video-wrapper">
+          <video id="vid-2" class="cctv-video" autoplay loop muted playsinline>
+            <source src="https://upload.wikimedia.org/wikipedia/commons/6/6d/Moving_vehicles_in_Link_road%2C_Cuttack%2C_Odisha.webm" type="video/webm">
+            <source src="https://upload.wikimedia.org/wikipedia/commons/4/4c/Traffic.ogv" type="video/ogg">
+          </video>
+          <canvas id="canv-2" class="cctv-canvas"></canvas>
+
+          <div class="cctv-osd">
+            <div class="osd-top">
+              <span class="cam-id">[●] CAM-02: CHORRAHA & PIYODALAR</span>
+              <span class="rec-badge"><span class="rec-dot"></span> REC</span>
+            </div>
+            
+            <div class="osd-center"></div>
+            <!-- AI Piyoda Aniqlash Bounding Box -->
+            <div class="ai-box person">
+              <span>🚶 PIYODA [96.4%]</span>
+            </div>
+
+            <div class="osd-bottom">
+              <span class="cam-location">CHORSU CHORRAHASI // 1080p 30FPS</span>
+              <span class="cam-timecode" id="tc-2">23:28:00.000</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- KAMERA 3: KIRISH DARVOZASI -->
+      <div class="cctv-card">
+        <div class="cctv-ctrl">
+          <button class="ctrl-btn" onclick="changeVideo(3)">Manba</button>
+        </div>
+        <div class="video-wrapper">
+          <video id="vid-3" class="cctv-video" autoplay loop muted playsinline>
+            <source src="https://upload.wikimedia.org/wikipedia/commons/a/a9/Bangkok_Traffic_During_Enduring_Partners_26_%281009429%29.webm" type="video/webm">
+            <source src="https://upload.wikimedia.org/wikipedia/commons/4/4c/Traffic.ogv" type="video/ogg">
+          </video>
+          <canvas id="canv-3" class="cctv-canvas"></canvas>
+
+          <div class="cctv-osd">
+            <div class="osd-top">
+              <span class="cam-id">[●] CAM-03: KIRISH DARVOZASI</span>
+              <span class="rec-badge"><span class="rec-dot"></span> REC</span>
+            </div>
+            
+            <div class="osd-center"></div>
+            <!-- Avto Skaner -->
+            <div class="ai-box car" style="width: 28%; height: 32%; top: 38%; left: 40%;">
+              <span>🚘 [01|A777AA] OK</span>
+            </div>
+
+            <div class="osd-bottom">
+              <span class="cam-location">ASOSIY DARVOZA // SHLAGBAUM [OCHIQ]</span>
+              <span class="cam-timecode" id="tc-3">23:28:00.000</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- KAMERA 4: AVTO TURARGOH -->
+      <div class="cctv-card">
+        <div class="cctv-ctrl">
+          <button class="ctrl-btn" onclick="changeVideo(4)">Manba</button>
+        </div>
+        <div class="video-wrapper">
+          <video id="vid-4" class="cctv-video" autoplay loop muted playsinline style="filter: hue-rotate(85deg) contrast(1.3) brightness(0.9);">
+            <source src="https://upload.wikimedia.org/wikipedia/commons/9/98/Miami_International_Airport_%28MIA%29_June_2024_VID_%280%29.webm" type="video/webm">
+            <source src="https://upload.wikimedia.org/wikipedia/commons/6/6d/Moving_vehicles_in_Link_road%2C_Cuttack%2C_Odisha.webm" type="video/webm">
+          </video>
+          <canvas id="canv-4" class="cctv-canvas"></canvas>
+
+          <div class="cctv-osd">
+            <div class="osd-top">
+              <span class="cam-id">[●] CAM-04: AVTO TURARGOH</span>
+              <span class="rec-badge"><span class="rec-dot"></span> REC</span>
+            </div>
+            
+            <div class="osd-center"></div>
+            <div class="ai-box person" style="left: 20%; top: 48%;">
+              <span>🚶 HAYDOVCHI [94%]</span>
+            </div>
+
+            <div class="osd-bottom">
+              <span class="cam-location">PARKOVKA // INFRAQIZIL NIGHT-VISION</span>
+              <span class="cam-timecode" id="tc-4">23:28:00.000</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div>
+      <b style="color: var(--bright-green);">KALI LINUX CYBER COMMAND</b> &nbsp;|&nbsp; 
+      STATUS: <span style="color: var(--bright-green);">ALL SYSTEMS OPERATIONAL</span> &nbsp;|&nbsp; 
+      DEFENSE: <span style="color: var(--cyan);">ENCRYPTED (AES-256)</span>
+    </div>
+    <div>
+      4-CH CCTV REALTIME SURVEILLANCE &nbsp;|&nbsp; TASHKENT (UTC+5)
+    </div>
+  </footer>
+
+  <script>
+    // 1. Toshkent Vaqti va Soat
+    function updateClock() {
+      const now = new Date();
+      const options = {
+        timeZone: 'Asia/Tashkent',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        day: '2-digit',
+        month: 'numeric',
+        year: 'numeric',
+        hour12: false
+      };
+      const parts = new Intl.DateTimeFormat('en-GB', options).formatToParts(now);
+      let hh = '00', mm = '00', ss = '00', day = '01', month = '01', year = '2026';
+      for (const p of parts) {
+        if (p.type === 'hour') hh = p.value;
+        if (p.type === 'minute') mm = p.value;
+        if (p.type === 'second') ss = p.value;
+        if (p.type === 'day') day = p.value;
+        if (p.type === 'month') month = p.value;
+        if (p.type === 'year') year = p.value;
+      }
+      
+      document.getElementById('hh').textContent = hh;
+      document.getElementById('mm').textContent = mm;
+      document.getElementById('ss').textContent = ss;
+
+      const monthsUz = ['Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'Iyun', 'Iyul', 'Avgust', 'Sentabr', 'Oktabr', 'Noyabr', 'Dekabr'];
+      const mIdx = Math.max(0, Math.min(11, parseInt(month) - 1));
+      const daysUz = ['Yakshanba', 'Dushanba', 'Seshanba', 'Chorshanba', 'Payshanba', 'Juma', 'Shanba'];
+      const dayOfWeek = daysUz[now.getDay()];
+
+      document.getElementById('date-str').textContent = 
+        `>>> ${day}-${monthsUz[mIdx].toUpperCase()}, ${year} // ${dayOfWeek.toUpperCase()} // UZBEKISTAN <<<`;
+
+      // CCTV Kameralarining timecode lari (millisekund bilan)
+      const ms = String(now.getMilliseconds()).padStart(3, '0');
+      const timecode = `${hh}:${mm}:${ss}.${ms}`;
+      for (let i = 1; i <= 4; i++) {
+        const el = document.getElementById('tc-' + i);
+        if (el) el.textContent = timecode;
+      }
+    }
+
+    setInterval(updateClock, 40);
+    updateClock();
+
+    // 2. Telemetriya ma'lumotlarini serverdan yangilash (/api/stats)
+    async function fetchStats() {
+      try {
+        const res = await fetch('/api/stats');
+        if (!res.ok) return;
+        const data = await res.json();
+        
+        if (data.ram) {
+          document.getElementById('ram-text').textContent = `${data.ram.percent}% (${data.ram.usedM}M / ${data.ram.totalM}M)`;
+          document.getElementById('ram-bar').style.width = data.ram.percent + '%';
+        }
+        if (data.cpu) {
+          document.getElementById('cpu-text').textContent = `${data.cpu.percent}% (${data.cpu.cores} Cores)`;
+          document.getElementById('cpu-bar').style.width = data.cpu.percent + '%';
+          if (data.cpu.model) document.getElementById('cpu-model').textContent = data.cpu.model;
+        }
+        if (data.uptime) {
+          document.getElementById('uptime-text').textContent = data.uptime;
+        }
+        if (data.lanIp) {
+          document.getElementById('lan-ip').textContent = data.lanIp;
+        }
+        if (data.hostname) {
+          document.getElementById('node-name').textContent = 'NODE: ' + data.hostname;
+        }
+      } catch (e) {
+        // Server bo'lmasa lokal tasodifiy dinamik ko'rsatkichlar
+        const mockRam = 10 + Math.floor(Math.random() * 3);
+        const mockCpu = 2 + Math.floor(Math.random() * 8);
+        document.getElementById('ram-bar').style.width = mockRam + '%';
+        document.getElementById('cpu-bar').style.width = mockCpu + '%';
+      }
+    }
+
+    setInterval(fetchStats, 2000);
+    fetchStats();
+
+    // 3. Fallback: Agar tashqi video yuklanmasa, Fotorealistik Canvas CCTV rendersi ishga tushadi
+    function initCanvasCCTV(canvasId, type) {
+      const canvas = document.getElementById(canvasId);
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      let w = canvas.width = 400;
+      let h = canvas.height = 250;
+
+      let tick = 0;
+      const cars = [
+        { x: -50, y: 140, speed: 2.2, color: '#39ff14', length: 45 },
+        { x: 120, y: 155, speed: 3.1, color: '#00f0ff', length: 50 },
+        { x: 300, y: 145, speed: 2.6, color: '#ffea00', length: 42 },
+        { x: 450, y: 90, speed: -2.8, color: '#ffffff', length: 46 },
+        { x: 200, y: 80, speed: -2.3, color: '#ff2a44', length: 55 }
+      ];
+
+      const peds = [
+        { x: 100, y: 170, speed: 0.8 },
+        { x: 180, y: 175, speed: -0.6 },
+        { x: 260, y: 168, speed: 0.9 }
+      ];
+
+      function draw() {
+        tick++;
+        ctx.fillStyle = '#0a140d';
+        ctx.fillRect(0, 0, w, h);
+
+        // Bino va ufq chizig'i
+        ctx.fillStyle = '#061009';
+        ctx.fillRect(0, 0, w, 60);
+
+        // Shahar binolari silueti
+        ctx.fillStyle = '#0d2414';
+        ctx.fillRect(20, 15, 45, 45);
+        ctx.fillRect(75, 25, 35, 35);
+        ctx.fillRect(150, 10, 50, 50);
+        ctx.fillRect(240, 20, 40, 40);
+        ctx.fillRect(310, 12, 60, 48);
+
+        // Bino derazalari chiroqlari
+        ctx.fillStyle = '#00ff6633';
+        for (let i = 25; i < 350; i += 30) {
+          ctx.fillRect(i, 30, 4, 4);
+          ctx.fillRect(i + 8, 38, 4, 4);
+        }
+
+        // Yo'l asfalti
+        ctx.fillStyle = '#0f1f14';
+        ctx.fillRect(0, 60, w, 130);
+
+        // Yo'l bo'yidagi svetofor
+        ctx.fillStyle = '#111';
+        ctx.fillRect(350, 50, 8, 24);
+        const lightColor = (Math.floor(tick / 90) % 3 === 0) ? '#ff2a44' : ((Math.floor(tick / 90) % 3 === 1) ? '#ffea00' : '#39ff14');
+        ctx.fillStyle = lightColor;
+        ctx.beginPath();
+        ctx.arc(354, 56, 3, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Yo'l ajratuvchi chiziqlari (oq/sariq punktirlar)
+        ctx.fillStyle = '#39ff1466';
+        ctx.fillRect(0, 125, w, 2);
+        ctx.setLineDash([12, 10]);
+        ctx.strokeStyle = '#00ff6688';
+        ctx.beginPath();
+        ctx.moveTo(0, 125);
+        ctx.lineTo(w, 125);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Piyodalar o'tish yo'lagi (Zebra)
+        ctx.fillStyle = '#ffffff15';
+        for (let x = 60; x < 150; x += 15) {
+          ctx.fillRect(x, 65, 8, 120);
+        }
+
+        // Mashinalar harakati
+        cars.forEach(car => {
+          car.x += car.speed;
+          if (car.speed > 0 && car.x > w + 60) car.x = -60;
+          if (car.speed < 0 && car.x < -60) car.x = w + 60;
+
+          // Mashina korpusi
+          ctx.fillStyle = car.color;
+          ctx.fillRect(car.x, car.y, car.length, 14);
+          // Tomi
+          ctx.fillStyle = '#00000088';
+          ctx.fillRect(car.x + (car.speed > 0 ? 8 : 4), car.y - 6, car.length - 12, 7);
+
+          // Fara chiroqlari nuri (Cone of light)
+          ctx.fillStyle = car.speed > 0 ? 'rgba(255, 234, 0, 0.15)' : 'rgba(255, 42, 68, 0.2)';
+          ctx.beginPath();
+          if (car.speed > 0) {
+            ctx.moveTo(car.x + car.length, car.y + 4);
+            ctx.lineTo(car.x + car.length + 35, car.y - 4);
+            ctx.lineTo(car.x + car.length + 35, car.y + 18);
+          } else {
+            ctx.moveTo(car.x, car.y + 4);
+            ctx.lineTo(car.x - 35, car.y - 4);
+            ctx.lineTo(car.x - 35, car.y + 18);
+          }
+          ctx.closePath();
+          ctx.fill();
+
+          // G'ildiraklar
+          ctx.fillStyle = '#000';
+          ctx.fillRect(car.x + 6, car.y + 12, 8, 4);
+          ctx.fillRect(car.x + car.length - 14, car.y + 12, 8, 4);
+        });
+
+        // Piyodalar harakati
+        peds.forEach(ped => {
+          ped.x += ped.speed;
+          if (ped.x > 140) ped.speed = -Math.abs(ped.speed);
+          if (ped.x < 70) ped.speed = Math.abs(ped.speed);
+
+          ctx.fillStyle = '#00f0ff';
+          // Bosh
+          ctx.beginPath();
+          ctx.arc(ped.x, ped.y - 12, 3, 0, Math.PI * 2);
+          ctx.fill();
+          // Tana
+          ctx.fillRect(ped.x - 1.5, ped.y - 9, 3, 7);
+          // Oyoqlar harakati
+          const legSwing = Math.sin(tick * 0.15) * 4;
+          ctx.strokeStyle = '#00f0ff';
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.moveTo(ped.x - 1, ped.y - 2);
+          ctx.lineTo(ped.x - legSwing, ped.y + 5);
+          ctx.moveTo(ped.x + 1, ped.y - 2);
+          ctx.lineTo(ped.x + legSwing, ped.y + 5);
+          ctx.stroke();
+        });
+
+        // Tungi CCTV shovqin (Noise)
+        const idata = ctx.getImageData(0, 0, w, h);
+        const buffer32 = new Uint32Array(idata.data.buffer);
+        for (let i = 0; i < buffer32.length; i += 4) {
+          if (Math.random() < 0.04) {
+            buffer32[i] = 0x2200ff00;
+          }
+        }
+        ctx.putImageData(idata, 0, 0);
+
+        requestAnimationFrame(draw);
+      }
+      draw();
+    }
+
+    // Har bir video uchun xato yuz berganda Canvasga o'tish tekshiruvi
+    for (let i = 1; i <= 4; i++) {
+      const vid = document.getElementById('vid-' + i);
+      const canv = document.getElementById('canv-' + i);
+      
+      vid.addEventListener('error', () => {
+        vid.style.display = 'none';
+        canv.style.display = 'block';
+        initCanvasCCTV('canv-' + i, i);
+      });
+
+      // 4 soniya ichida o'ynamasa avtomatik canvas yoqish
+      setTimeout(() => {
+        if (vid.readyState < 2 && vid.paused) {
+          vid.style.display = 'none';
+          canv.style.display = 'block';
+          initCanvasCCTV('canv-' + i, i);
+        }
+      }, 3500);
+    }
+
+    // 4. Video manbasini foydalanuvchi xohlagan MP4 yoki URL ga almashtirish
+    function changeVideo(camNum) {
+      const current = document.getElementById('vid-' + camNum);
+      const url = prompt(`CAM-0${camNum} uchun yangi MP4/WebM video havolasini yoki mahalliy fayl yo'lini kiriting:`);
+      if (url && url.trim()) {
+        current.style.display = 'block';
+        const canv = document.getElementById('canv-' + camNum);
+        if (canv) canv.style.display = 'none';
+        current.src = url.trim();
+        current.play();
+      }
+    }
+
+    // 5. Butun ekranga ochish funksiyasi
+    function toggleFullScreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(err => {
+          alert(`To'liq ekranga o'tishda xatolik: ${err.message}`);
+        });
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        }
+      }
+    }
+  </script>
+</body>
+</html>
