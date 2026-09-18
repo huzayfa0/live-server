@@ -13,7 +13,6 @@ const WHITE = '\x1b[97m';
 const YELLOW = '\x1b[93m';
 const RESET = '\x1b[0m';
 const BOLD = '\x1b[1m';
-const CLEAR = '\x1b[2J\x1b[H';
 const HIDE_CURSOR = '\x1b[?25l';
 const SHOW_CURSOR = '\x1b[?25h';
 
@@ -33,15 +32,15 @@ const font = {
   ' ': ['  ', '  ', '  ', '  ', '  ']
 };
 
-// 24 ta aylanuvchi Katta Yer shari freymlari (20 qator x 46 ustun)
-const earthFrames = [["              -+osoooo/.                      ","          :sdho+   :yyyNh:~                   ","       :so~.    .o~@h/@@@@@s                  ","     /h~        //Ny::@@+@dh@@@~              ","     ho          @@-  ::dsNd@o@@+             ","   h          ~s@@@@@@@@@@@y@@N@@@            ","   y          :@@@@@@@@@@@@Ny@@ydhs           ","-@~         y@@@@@@@@@@@@@@@N-d@-~o:          ","h/          y@@@@@@@@@@@@@@@@@h-~~.@          ","/d@@~          yyy   y@@@@@@@@@h~~~s          ","o@@@s/                @@@@@@@@d-~~~o          ","+N@@@@o+              @@@@@@@@:~~~~s          ","dh@@@@N~               @@@@@@/~~~~~@          ","-@@@@@@               h@@@@@@.yy~~./          ","   y@@@~               @@@@N+~+~~~y           ","   h@@N               o@@@d~~~~~.y            ","     dd.               .~~~~~~~:o             ","     ~@:                ~~~~~~y~              ","       ~ss-           ~~~-+s~                 ","          /s+:~ ~-:://+ys/.                   "],["              -+osoooo/.                      ","          :sdhs+.  .hsy@h:~                   ","       :sy~.~    + @@.@@@@@s                  ","     /d-~        -/Ny+N@Nh@N@@@~              ","     ds           @s  ~:ossd@h@@+             ","   d           :@@@@@@@@@@@@y@@@@@            ","   h           d@@@@@@@@@@@@yo@@@ys           ","-@~          ~@@@@@@@@@@@@@@@@:@d~-:          ","h/~          .@@@@@@@@@@@@@@@@@-.~~@          ","/h@@+~          yyyo ~h@@@@@@@@@/~~s          ","oh@@@s/               ~@@@@@@@@o~~~o          ","+h@@@@@+.             ~@@@@@@@N.~~~s          ","do@@@@@+               :@@@@@@o~~~~@          ","-@@@@@@+              :@@@@@@@-@~~./          ","   y@@@d               ~@@@@d~s/~~y           ","   hN@@-               yN@No~~~~.y            ","     hyo                -~~~~~~:o             ","     ~h+                ~~~~~~y~              ","       ~ss-~          ~~~-+s~                 ","          /so:~ ~~:///+ss/.                   "],["              -+oyoooo/.                      ","          :sydh+/.  :hhdh:~                   ","       :oN. ~     o /N-@@@@s                  ","     /Ns .        ~/@hsd@NoNdN@~              ","     @d~           @@/ ~/+dsh@hN+             ","   @             o@@@@@@@@@@@y@@@@            ","   y             h@@@@@@@@@@@hoNdds           ","-@             @@@@@@@@@@@@@@@@/@:.:          ","hs~~           d@@@@@@@@@@@@@@@@-.~@          ","/hd@@@.           yyy~ sh@@@@@@@@y~s          ","oy@@@@h/                 @@@@@@@o.~o          ","+h@@@@@@++~              @@@@@@@.~~s          ","d/@@@@@@@/               @@@@@@y~~~@          ","-@.@@@@@N~              h@@@@@@:@~./          ","   y+@@@N                @@@@@~..~y           ","   h/@@@:                h@@d~~~.y            ","     h:N-                -.~~~~:o             ","     ~yd                ~~~~~~y~              ","       ~ss-           ~~~-+s~                 ","          /os/~  ~-://+os/.                   "],["              -+oysooo/.                      ","          :shohs+/   :ddh:~                   ","       :o@:  .     o/shs@@@s                  ","     /Nd+ ~         /+@yh@@sN@@~              ","     @@+            o@d  ++dsd@d+             ","   @.             :o@@@@@@@@@@h@N@            ","   y:              @@@@@@@@@@@yh@@s           ","-@               y@@@@@@@@@@@@@N/@/:          ","h+ ~~            oN@@@@@@@@@@@@@@-.@          ","/h~@@@@:            yyy  oN@@@@@@@/s          ","oy/@@@@@/-                h@@@@@@@~o          ","+h:@@@@@@h++              d@@@@@@/~s          ","d/-@@@@@@@d.               @@@@@o~~@          ","-@ s@@@@@@@              :h@@@@@:o./          ","   y N@@@@~                @@@ds:~y           ","   h -@@@o                s@@d~~.y            ","     h:+@~               ~~.~~~:o             ","     ~y:y               ~~~~~~y~              ","       ~ss-           ~~~-+s~                 ","          /oys.   ~://+os/.                   "],["              -+oyyooo/.                      ","          :syhsh++~  ~ddy:~                   ","       :ssh~ ~~     /:do+@@s                  ","     /@N+o           ~+@yh@@@@d~              ","     @@@.             @@~ .+ddN@+             ","   @h.              :@@@@@@@@@@@@N            ","   d                s@@@@@@@@@@@h@s           ","-@. ~~             @@@@@@@@@@@@@NdN:          ","h/o~~~~            d@@@@@@@@@@@@@d-@          ","/h :@@@@+            .yhh ~hN@@@@@Ns          ","oy N@@@@@//-                @@@@@@so          ","+h @@@@@@@@h+.             ~@@@@@@-s          ","d/ o@@@@@@@@/-             ~y@@@@.~@          ","-@  @@@@@@@@              ~oN@@@@yo/          ","   y  o@@@@N~             ~~@@@@:/y           ","   h  s@@@@-              ~/d@h~.y            ","     h: @d.             ~~~~.~~:o             ","     ~y @:              ~~~~~~y~              ","       ~ss-           ~~~-+s~                 ","          /o+s-   ~://+os/.                   "],["            ./osyyoo+:.                       ","          :sys-dh+/. ~/Ny:~                   ","       :ssys~ ~      +:@y@@s                  ","     /@d@ho            +@yo@d@@~              ","     @@@s              +@-~-ohd@+             ","   Nhy                s@@@@@@@@@@@            ","   @ -.               o@@@@@@@@@h@s           ","-@y   ~             ~@@@@@@@@@@@@dd:          ","h/ -~~.~             d@@@@@@@@@@@@@@          ","/h  :@@@@@/            shhs..d@@@@@h          ","oy  @@@@@@@//              ~~-@@@@@o          ","+h  @@@@@@@@@++/           ~~-@@@@Ns          ","d/  y@@@@@@@@@/            ~~-@@@@/@          ","-@  ~-@@@@@@@@~            ~.@@@@dy/          ","   y   y@@@@@.            ~~~y@@@.y           ","   h   d@@@@y             ~~~d@s.y            ","     h:  @dh             ~~~~~~:o             ","     ~y  @d             ~~~~~~y~              ","       ~ss-           ~~~-+s~                 ","          /o+/s    .//+os/.                   "],["              -+oyyyoo/.                      ","          :yyss-@h+~ ~:@y:~                   ","       :s@:dh  ~      +ohs@s                  ","     /@@N@so ~          +@dy@@@~              ","     @@@@+              .@@~:ss@+             ","   Nhhh                /y@@@@@@@N@            ","   @/  ~                @@@@@@@@@ds           ","-@/:   ~               @@@@@@@@@@@h:          ","h/ ~~~...~             @@@@@@@@@@@@@          ","/h   ~@@@@@@:            ohho-h@@@@N          ","oy   -@@@@@@@//             ~~~@@@@h          ","+h   -@@@@@@@@@++~          ~~~@@@@y          ","d/   :@@@@@@@@@@/~         ~~~~@@@@@          ","-@    -@@@@@@@@@           ~.~s@@@h/          ","   y    o@@@@@@.           ~~~s@@oy           ","   h    h@@@@dy           ~~~~@@-y            ","     h:  ~@@d~           ~~~~~~:o             ","     ~y  .@h            ~~~~~~y~              ","       ~ss-~          ~~~-+s~                 ","          /o+:o.   ~:/+os/.                   "],["              -+osyyoo/.                      ","          :yds+~d@y/..:sy:~                   ","       :s@/+@s~ ~      ssdds                  ","     /@@@N@os.           o@d@@d~              ","     @@@@@/-             ~dN~syh+             ","   d@dsy                 +@@@@@@@N            ","   d@   ~                h@@@@@@@@s           ","-@ y.~  ~               d@@@@@@@@@N:          ","h/  .d~....             oN@@@@@@@@@@          ","/h     o@@@@@s:            hhh.y@@@@          ","oy     @@@@@@@@//           ~~~~@@@@          ","+h     @@@@@@@@@@++-       ~~~~~@@@N          ","d/    -N@@@@@@@@@@/        ~~~~~N@@@          ","-@     .@@@@@@@@@@        ~~~~~o@@@/          ","   y     .@@@@@@@.        ~~~~~.@@y           ","   h     o@@@@@d          ~~~~~@sh            ","     h:   ~h@@.         ~~~~~~~:o             ","     ~y    Nh           ~~~~~~y~              ","       ~ss- ~         ~~~-+s~                 ","          /o+:-s   ~./+os/.                   "],["              -+osyyoo/.                      ","          :ydho+ y@+~.:oy:~                   ","       :sN@..@+~ ~     .syys                  ","     /@@@NN@s~:          ~:Nh@@~              ","     @@@@@@N-             ~h@~yh+             ","   hd@ysy                 -@@@@@N@            ","   ysN.  -                 N@@@@@@s           ","-@ .yd~   ~               @@@@@@@@@:          ","h/    d ~....             s@@@@@@@@@          ","/h      :@@@@@@d-          ~~hh~yN@@          ","oy      @@@@@@@@d//        ~~~~~~h@@          ","+h      @@@@@@@@@@N++      ~~~~~~h@@          ","d/      o@@@@@@@@@@N/      ~~~~~~@@@          ","-@       -@@@@@@@@@d       ~~~~~y@@/          ","   y       o@@@@@@:~      ~~~~~~/@y           ","   h       N@@@@@y        ~~~~~.NN            ","     h:     s@@/.        ~~~~~~:o             ","     ~y     N@~         ~~~~~~y~              ","       ~ss- ~.        ~~~-+s~                 ","          /o+:./:   .-+os/.                   "],["              -+ooyyso/.                      ","          :y@d++- Nd:./os:~                   ","       :s@No~oN/~ ~    ~.hds                  ","     /N@@@NN@h~+         ~~+@@@~              ","     hd@@@@@@:            ~~do+h+             ","   h.y@yoy+                .o@@@N@            ","   y:@@~  /                ~y@@@@@s           ","-@  .:d~                   .@@@@@@@:          ","h/     /~~.....             @@@@@@@@          ","/h       .:@@@@@@/          ~~hh~:@@          ","oy       s@@@@@@@@+//       ~~~~~~@@          ","+h       o@@@@@@@@@@@++     ~~~~~~@@          ","d/       ~y@@@@@@@@@@@/    ~~~~~~.N@          ","-@        ~s@@@@@@@@@@     ~~~~~~N@/          ","   y         @@@@@@@:~     ~~~~~~Ny           ","   h        /@@@@@hy      ~~~~~~@@            ","     h:      -@@@-      ~~~~~~~:o             ","     ~y      @@:        ~~~~~~y~              ","       ~ss-   -       ~~~-+s~                 ","          /o+:..o:  .-+os/.                   "],["              -+ooyyso/.                      ","          :yN@y:+:/@s::oo:~                   ","       :s@N@h d@o~ ~   ~~shs                  ","     /y@@@@NN@@-s~       ~~~y@d~              ","     h+@@@@@@@:           ~~~N.o+             ","   h .@@so+s               ~~+@@N@            ","   y ys@~   -              ~~/@@@@s           ","-@   ~-d~~                 ~~@@@@@@:          ","h/       y ~....~          ~~@N@@@@@          ","/h         .h@@@@@@y.      ~~~~yh+s@          ","oy         s@@@@@@@@h/-    ~~~~~~~~@          ","+h         o@@@@@@@@@@d++  ~~~~~~~~@          ","d/         /@@@@@@@@@@@y.  ~~~~~~~.@          ","-@          :o@@@@@@@@@:  ~~~~~~~-N/          ","   y          d@@@@@@@:   ~~~~~~~:y           ","   h          s@@@@@h     ~~~~~~-N            ","     h:        @@@s~    ~~~~~~~:o             ","     ~y       .@y       ~~~~~~y~              ","       ~ss-    -      ~~~-+s~                 ","          /o+:.~:o- ~.:os/.                   "],["              -+ossyso/.                      ","          :yNNh+/+.hNy:so:~                   ","       :s@NN@+ N@o~~~  ~~:hs                  ","     /+d@@@@N@@@+ :      ~~~:Nd~              ","     h/h@@@@@@@+:         ~~~-d/+             ","   h  -@@ss+o:             ~~~s@@@            ","   y  :y@-   :              ~~/@@@s           ","-@    ~~h@~~                ~./@@@@:          ","h/         h~~.....        ~~~~N@@@@          ","/h           :s@@@@@@:     ~~~~~yh.@          ","oy           @@@@@@@@@+//  ~~~~~~~~@          ","+h           @@@@@@@@@@@N+:~~~~~~~~@          ","d/          ~/@@@@@@@@@@@/.~~~~~~~~@          ","-@            :@@@@@@@@@@  ~~~~~~~//          ","   y            d@@@@@@+  ~~~~~~~~y           ","   h            @@@@@@s   ~~~~~~.h            ","     h:         .@N@.    ~~~~~~:o             ","     ~y        ~N@      ~~~~~~y~              ","       ~ss-    ~-     ~~~-+s~                 ","          /o+:~~.:-~~.:os/.                   "],["              -+oooyso/.                      ","          :yd@Ns:::-@@oso:~                   ","       :o@@@N@:~o@o~~~ ~~:hs                  ","     /+-@@@@@@@N@d~o     ~~~.y@~              ","     h/~@@@@@@@@@:        ~~~~yd+             ","   h   -@@@sooo:           ~~~~@@@            ","   y   /s@h   ~.           ~~~~~@@s           ","-@      ~~h/~~             ~.~~:@@@:          ","h/          yd~.....        ~~~~@@@@          ","/h             :@@@@@@@:~   ~~~~~-h@          ","oy             @@@@@@@@@o+  ~~~~~~~o          ","+h             @@@@@@@@@@@oo:~~~~~~y          ","d/             +@@@@@@@@@@@+~~~~~~~@          ","-@              :N@@@@@@@@@~~~~~~~./          ","   y              N@@@@@N:~~~~~~~~y           ","   h             h@@@@@y+ ~~~~~~.y            ","     h:           @N@d. ~~~~~~~:o             ","     ~y          h@o    ~~~~~~y~              ","       ~ss-     ~-    ~~~-+s~                 ","          /o+:.~~./.~~:os/.                   "],["              -+ooosso/.                      ","          :y@dNy/-+-hNyss:~                   ","       :oN@N@@s ~Ns.~~ ~~:ys                  ","     /+ N@@@@@N@@@y-~    ~~~~sd~              ","     h/ d@@@@@@@@@-       ~~~~+@+             ","   h   .o@@ho++o~          ~~~~/@@            ","   y    y@@N   -:          ~~~~~d@s           ","-@      ~~+@~~~            ~~~~~@@@:          ","h/           .o~......     ~.~~~@@@@          ","/h              :@@@@@@N:   ~~~~~~hy          ","oy              @@@@@@@@@/+ ~~~~~~~o          ","+h              @@@@@@@@@@@oo~~~~~~s          ","d/             .s@@@@@@@@@@N:~~~~~~@          ","-@              ~:@@@@@@@@@s~~~~~~./          ","   y              -@@@@@@y/~~~~~~~y           ","   h              @@@@@@h~~~~~~~.y            ","     h:           -@@@: ~~~~~~~:o             ","     ~y          :@@    ~~~~~~y~              ","       ~ss-      ~-   ~~~-+s~                 ","          /o+:.~~~:..~:os/.                   "],["              -+oossso/.                      ","          :y@d@ds+://h@ss:~                   ","       :oy@@@N@s.-@oo~.~~:ss                  ","     /+ .d@@@@@@@N@h~s   ~~~~+y~              ","     h/  @@@@@@@@@@:      ~~~~.s+             ","   h    ./d@@oo+oo         ~~~~~N@            ","   y     shN@    -          ~~~~~@s           ","-@        ~ h@~~           ~~.~~~@@:          ","h/             d~~.....    ~~~~~~N@@          ","/h                /N@@@@@N:~~~~~~~-d          ","oy               ~@@@@@@@@N++~~~~~~o          ","+h               ~@@@@@@@@@@@o:~~~~s          ","d/                +@@@@@@@@@@+~~~~~@          ","-@                 :@@@@@@@@@.~~~~./          ","   y                N@@@@@@o~~~~~~y           ","   h                @@@@@N+~~~~~.y            ","     h:             @@@y~~~~~~~:o             ","     ~y           ~+@.  ~~~~~.y~              ","       ~ss-       ~- ~~~~-+s~                 ","          /o+:. ~~-/.:-os/.                   "],["              -+oososo/.                      ","          :yN@y@dy:://@hs:~                   ","       :ooN@@@@@y~/@y+.~~:ss                  ","     /+   N@@@@@@@@@Ns+  ~~~~+y~              ","     h/   @@@@@@@@@@y:    ~~~~~/+             ","   h      /s@@@oo++o       ~~~~~/@            ","   y      /yd@d    :        ~~~~~ss           ","-@            h@ ~         ~.~.~~o@:          ","h/               o:~.....   ~~~~~.N@          ","/h                  :@@@@@@/:~~~~~~@          ","oy                  @@@@@@@@@+~~~~~o          ","+h                  @@@@@@@@@@o/~~~s          ","d/                 -d@@@@@@@@@N.~~~@          ","-@                  -:@@@@@@@@o~~~./          ","   y                  N@@@@@h.~~~~y           ","   h                 :@@@@@y.~~~.y            ","     h:               @@@-~~~~~:o             ","     ~y             /@o ~~~~~~y~              ","       ~ss-        ~- ~~~-+s~                 ","          /o+:~~~~~::~:os/.                   "],["              -+ooooso/.                      ","          :yN@yd@d+:+ohNo:~                   ","       :os+@@@d@@s~+do:-.:ss                  ","     /+    @@@@@@@@@@@h/~~~~~+y~              ","     h/    s@@@@@@@@@@/   ~~~~~:+             ","   h       -/@@@oo+++~     ~~~~~.d            ","   y        +y@@@   -:     ~~~~~~.s           ","-@             -d@ ~       ~~~~~~~s:          ","h/                 d~~.....~.~.~~~.@          ","/h                   ~+@@@@@@/~~~~~y          ","oy                   -@@@@@@@@+-~~~o          ","+h                   -@@@@@@@@@y/~~s          ","d/                   .s@@@@@@@@N.~~@          ","-@                    .h@@@@@@@s~~./          ","   y                   .@@@@@@.~~~y           ","   h                   @@@@@d-~~.y            ","     h:                @@@+~~~~:o             ","     ~y              :Nh~~~~~~y~              ","       ~ss-         ~-~.~-+s~                 ","          /o+:~~ ~~-::/os/.                   "],["              -+ooosso/.                      ","          :y@@hs@@No:/o@s:~                   ","       :oy:@@@@@@@s~-No--:ss                  ","     /+     @@@@@@@@@N@@:..~~+y~              ","     h/     +@@@@@@@@@@h  ~~~~~:+             ","   h         /+@@@oo+o+    ~~~~~.h            ","   y         :ydN@    -~    ~~~~~~s           ","-@               ~hh ~   ~ ~~.~~~~.:          ","h/                  ~d~....-~~~~~~~@          ","/h                     :/@@@@@s~~~~s          ","oy                     @@@@@@@@+-~~o          ","+h                     @@@@@@@@@ys~s          ","d/                     /@@@@@@@@@~~@          ","-@                      :@@@@@@@/~./          ","   y                     @@@@@@/~~y           ","   h                     @@@@d.~.y            ","     h:                 @N@+~~~:o             ","     ~y               .d@.~~~~y~              ","       ~ss-           -.~-+s~                 ","          /o+:~~  ~~/::ss/.                   "],["              -+ooosoo/.                      ","          :yN@hsdddy::hhy:~                   ","       :oy:-y@@@d@@o//do/:ss                  ","     /+      /@@@@@@@@@@N/+~~+y~              ","     h/      .@@@@@@@@@@N~~~~~~:+             ","   h           /h@@@ooo+/  ~~~~~.h            ","   y           +yd@@    /  ~~~~~~~s           ","-@                 s@@ ~   ~.~.~~~.:          ","h/                     @~...-.~~~~~@          ","/h                       -N@@@@h~~~s          ","oy                       y@@@@@@++~o          ","+h                       h@@@@@@@@/s          ","d/                       o@@@@@@@o.@          ","-@                       ~:@@@@@@../          ","   y                       @@@@@:~y           ","   h                      N@@@h~.y            ","     h:                 ~y@d/~~:o             ","     ~y                .s@.~~~y~              ","       ~ss-           ~-~-+s~                 ","          /o+:~ ~ ~~-//ss/.                   "],["              -+oooooo/.                      ","          :y@@dso@NNy/+yy:~                   ","       :os/-.@@@@@@Ns-oso/ss                  ","     /+       .@@@@@@@@@@N//~+y~              ","     h/        @@@@@@@@@@@s~~~~:+             ","   h            +o@@@oo+o+ ~~~~~.h            ","   y             /hN@@   ::~~~~~~~s           ","-@                   /@:~  ~.~~~~~.:          ","h/                      o-~.---~~~~@          ","/h                         /N@@@h:~s          ","oy                         @@@@@@@-o          ","+h                         @@@@@@@hs          ","d/                         s@@@@@@y@          ","-@                        ~-@@@@@@./          ","   y                      ~~N@@@@~y           ","   h                      ~h@@@o.y            ","     d:                 ~~.@d-~:o             ","     ~y                 ~sN~~~y~              ","       ~ss-           ~.--+s~                 ","          /o+:~ ~~ ~.:/os/.                   "],["              -+oososo/.                      ","          :sd@Nsh+ddhh+ds:~                   ","       :oo::.-N@@@N@@o.sssss                  ","     /+         @@@@@@@N@@@:.+y~              ","     h/         ~@@@@@@@@@@y~~~:+             ","   h              +o@@Nooo/~~~~~.h            ","   y              :y@N@.   /~~~~~~s           ","-@                     h@~.~~-.~~~.:          ","h/                        s-.---~~~@          ","/h                         ~~s@@@@.s          ","oy                         ~~@@@@@so          ","+h                         ~~@@@@@@h          ","d/                         ~/@@@@@@@          ","-@                         ~~h@@@@d/          ","   y                      ~~~h@@@+y           ","   h                      ~~~@@@:y            ","     h/                  ~~.@h~:o             ","     ~y                 ~~yd:~y~              ","       ~ss-           ~~.-+s~                 ","          /o+:~  ~ ~.-+ss/.                   "],["            ./ooosoo+:.                       ","          :sdh@hsddd@hyys:~                   ","       :oo.+/.:@@@@@@No/oyss                  ","     /+          :@@@@@@N@@@o+y~              ","     h/           @@@@@@@@@@s~~:+             ","   h                oh@@@so++~~~.h            ","   y                :y@@@  ~/~~~~~s           ","-@                     ~-@@.-~..~~.:          ","h/                          h---.~~@          ","/h                          ~~/@@@hs          ","oy                          ~~@@@@@s          ","+h                          ~~@@@@@@          ","d/                         ~~:s@@@@@          ","-@                         ~.~-@@@@/          ","   y                       ~~~y@@@y           ","   h                      ~~~~@@sh            ","     h/                 ~~~~-@o:o             ","     ~h~                ~~~yd.y~              ","       ~ss-           ~~~:+s~                 ","          /o+:~   ~~.-/os/.                   "],["              -+oooooo/.                      ","          :yhhhdsss@d@Nsy:~                   ","       :oo-:+.~/h@@N@@h+/yhs                  ","     /+            @@@@@@N@@yoy~              ","     h/            d@@@@@@@@@-~:+             ","   h                 +o@@@ssy/~~.h            ","   y                  :dN@d~~:~~~~s           ","-@                      ~~/@-:~~.~.:          ","h/                         ~~@:...~@          ","/h                         ~~~~/@@@s          ","oy                         ~~~~@@@@h          ","+h                         ~~~~N@@@@          ","d/                         ~~~~o@@@@          ","-@.                       ~~~~~.@@@/          ","   y                      ~~~~~.@@y           ","   h                      ~~~~.@NN            ","     h::                ~~~~~+yso             ","     ~y-                ~~~-yoy~              ","       ~ss-           ~~~-+s~                 ","          /o+:~   ~~.-:os/.                   "],["             .-+oooso+:                       ","          :ydysdhsdo@d@hs:~                   ","       :so: ~o~~-d@@@N@o+sds                  ","     /+             @@@@@@N@@yh~              ","     h/             -@@@@@@@@@~:+             ","   h                  ~ss@@yyy/~.h            ","   y                   :y@N@~~::~~s           ","-@                        ~~do-~.~.:          ","h/                         ~~~~+...@          ","/h                         ~~~~~:@@@          ","oy                         ~~~~~@@@@          ","+h                         ~~~~~@@@@          ","d/                         ~~~~~s@@@          ","-@                         ~~~~~-@@/          ","   h                      ~~~~~~/@y           ","   @                      ~~~~~+@@            ","     h: ~                ~~~~~yho             ","     ~y:                ~~~~.yy~              ","       ~ss-           ~~~-+s~                 ","          /o+:~    ~.-:os/.                   "]];
+// 24 ta aylanuvchi Yer shari freymlari (12 qator x 32 ustun)
+const earthFrames = [["          -+sooo.               ","       :sdo+  yyNh:             ","    /~      /N::@+@h@@~         ","          ~s@@@@@@@y@N@@        ","          :@@@@@@@@Ny@yhs       ","h/       y@@@@@@@@@@@h-~.@      ","o@@s/           @@@@@d-~~o      ","+N@@@+          @@@@@:~~~s      ","-@@@@           @@@@@yy~./      ","   @@           @@@~~~~y        ","    d.          .~~~~~:         ","     ~s-        ~~-s~           "],["          -+sooo.               ","       :sds+  hs@h:             ","    /-~     -/y+@NhN@@~         ","           :@@@@@@@@y@@@        ","           d@@@@@@@@y@@ys       ","h/~       @@@@@@@@@@@@-~~@      ","oh@@s           @@@@@@o~~o      ","+h@@@+.         @@@@@N.~~s      ","-@@@@+          @@@@@-@~./      ","   N@-          yN@o~~~y        ","    ho           -~~~~:         ","     ~s-~       ~~-s~           "],["          -+yooo.               ","       :syh+. :hdh:             ","    /s       ~@hd@NNd@~         ","            o@@@@@@@@@@@        ","            h@@@@@@@@oNds       ","hs~        d@@@@@@@@@@@.~@      ","oy@@@/            @@@@@.~o      ","+h@@@@+~          @@@@@~~s      ","-@.@@@N          h@@@@:~./      ","   /@@:           h@d~~y        ","    hN-           -~~~:         ","     ~s-        ~~-s~           "],["          -+ysoo.               ","       :shhs/  :dh:             ","    /d+~      /+yh@sN@~         ","   .         :@@@@@@@h@@        ","   :          @@@@@@@yh@s       ","h+ ~        oN@@@@@@@@@-.@      ","oy/@@@/            @@@@@~o      ","+h:@@@@++          @@@@/~s      ","-@ @@@@@          :@@@@o./      ","    -@@            @@~~y        ","    h+@           ~.~~:         ","     ~s-        ~~-s~           "],["          -+yyoo.               ","       :sysh+~ ~dy:             ","    /N+        ~@yh@@d~         ","   h.         :@@@@@@@@N        ","              s@@@@@@@@@s       ","h/o~~         @@@@@@@@@d-@      ","oy @@@@/-           @@@@so      ","+h @@@@@h+         ~@@@@-s      ","-@ @@@@@@          oN@@yo/      ","     @@@-          /dh~y        ","    h @.         ~~~.~:         ","     ~s-        ~~-s~           "],["         .osyo+:                ","       :sy-d+/ ~Ny:             ","    /d@o        +@y@d@~         ","   hy           @@@@@@@@        ","    -           @@@@@@@@s       ","h/ ~~~         d@@@@@@@@@@      ","oy @@@@@//         ~~@@@@o      ","+h @@@@@@@+/       ~~@@@Ns      ","-@ ~-@@@@@~        ~.@@dy/      ","     d@@@y         ~~@sy        ","    h  dh         ~~~~:         ","     ~s-        ~~-s~           "],["          -+yyoo.               ","       :yys-h+ ~@y:             ","    /@Nso        +@y@@~         ","   hh           /y@@@@@@        ","   / ~           @@@@@@ds       ","h/ ~~..         @@@@@@@@@@      ","oy  -@@@@@/         ~~@@@h      ","+h  -@@@@@@+~       ~~@@@y      ","-@   @@@@@@@       ~.s@@h/      ","      h@@@y        ~~@@y        ","    h  @@d        ~~~~:         ","     ~s-~       ~~-s~           "],["          -+syoo.               ","       :yd+~@y..sy:             ","    /@@@os        od@d~         ","   @dy            +@@@@N        ","   @  ~           h@@@@@s       ","h/ .d...         oN@@@@@@@      ","oy   @@@@@@/        ~~~@@@      ","+h   @@@@@@@++     ~~~~@@N      ","-@   .@@@@@@@      ~~~o@@/      ","       @@@@d       ~~~@h        ","    h  ~h@.      ~~~~~:         ","     ~s- ~      ~~-s~           "],["          -+syoo.               ","       :ydo+y@~.oy:             ","    /@@N@s:       ~Nh@~         ","   d@sy            @@@@@        ","   sN              N@@@@s       ","h/    ~...         @@@@@@@      ","oy    @@@@@@//     ~~~~h@@      ","+h    @@@@@@@N+    ~~~~h@@      ","-@     @@@@@@@     ~~~~@@/      ","        N@@@y      ~~~.N        ","    h    s@/      ~~~~:         ","     ~s- ~      ~~-s~           "],["          -+oyso.               ","       :y@++ N:.os:             ","    /@@NN@~+      ~+@@~         ","   .yyo+           .o@@@        ","   :@~ /           ~y@@@s       ","h/   /~....         @@@@@@      ","oy     @@@@@@+/     ~~~~@@      ","+h     @@@@@@@@+    ~~~~@@      ","-@     ~s@@@@@@@   ~~~~N@/      ","         /@@@h     ~~~~@        ","    h     @@-    ~~~~~:         ","     ~s-  -     ~~-s~           "],["          -+oyso.               ","       :yNy::/s:oo:             ","    /@@@NN@-~     ~~yd~         ","    .@s+s          ~~@@@        ","    y@~  -         ~~@@@s       ","h/      ~...       ~~N@@@@      ","oy      s@@@@@h/   ~~~~~~@      ","+h      o@@@@@@@++ ~~~~~~@      ","-@       :@@@@@@:  ~~~~-N/      ","          s@@@h    ~~~~N        ","    h      @@s   ~~~~~:         ","     ~s-   -    ~~-s~           "],["          -+ssso.               ","       :yNh++.Nyso:             ","    /d@@@N@@ :    ~~:d~         ","     @@s+o         ~~s@@        ","     y@             ~/@@s       ","h/      h~....     ~~~N@@@      ","oy        @@@@@@// ~~~~~~@      ","+h        @@@@@@@N+~~~~~~@      ","-@        :@@@@@@@ ~~~~~//      ","            @@@@   ~~~~h        ","    h       @N.   ~~~~:         ","     ~s-   ~    ~~-s~           "],["          -+ooso.               ","       :ydNs::@@so:             ","    /-@@@@@Nd~    ~~.@~         ","     -@@soo:       ~~~@@        ","     /sh  ~.       ~~~~@s       ","h/       y~...      ~~~@@@      ","oy         @@@@@@o+ ~~~~~o      ","+h         @@@@@@@@o:~~~~y      ","-@          N@@@@@@~~~~~./      ","            h@@@y+ ~~~~y        ","    h        @@d ~~~~~:         ","     ~s-    -   ~~-s~           "],["          -+ooso.               ","       :y@Ny-+hNss:             ","    / N@@@N@@y~   ~~~d~         ","     .o@ho+o       ~~~/@        ","      y@N  -       ~~~~@s       ","h/        o~....   ~.~~@@@      ","oy          @@@@@@/ ~~~~~o      ","+h          @@@@@@@oo~~~~s      ","-@          :@@@@@@s~~~~./      ","             @@@@h~~~~~y        ","    h        -@@ ~~~~~:         ","     ~s-    ~-  ~~-s~           "],["          -+osso.               ","       :y@@d+:/hss:             ","    / .@@@@@N@~s  ~~~y~         ","      .d@@o+o      ~~~~@        ","       hN@  -       ~~~@s       ","h/         d~...   ~~~~N@@      ","oy          ~@@@@@@++~~~~o      ","+h          ~@@@@@@@@:~~~s      ","-@            @@@@@@@~~~./      ","              @@@@N~~~~y        ","    h         @@y~~~~~:         ","     ~s-     ~ ~~~-s~           "],["          -+osso.               ","       :yNy@y://hs:             ","    /  N@@@@@@Ns  ~~~y~         ","       /s@@o++     ~~~~@        ","       /ydd         ~~~ss       ","h/          o:....  ~~~.N@      ","oy            @@@@@@@~~~~o      ","+h            @@@@@@@o/~~s      ","-@            -:@@@@@o~~./      ","               :@@@y.~~y        ","    h           @@-~~~:         ","     ~s-      - ~~-s~           "],["          -+ooso.               ","       :yNydd++oNo:             ","    /   @@@@@@@@/~~~~y~         ","        -/@@o++~   ~~~~d        ","         +@@  -:   ~~~~.s       ","h/            ~~...~..~~.@      ","oy             -@@@@@+-~~o      ","+h             -@@@@@@y~~s      ","-@              h@@@@@s~./      ","                @@@@d~~y        ","    h           @@@~~~:         ","     ~s-      ~-.~-s~           "],["          -+ooso.               ","       :y@hs@N:/@s:             ","    /    @@@@@@N@:.~~y~         ","          +@@o+o   ~~~~h        ","          yd@   ~   ~~~~s       ","h/            ~d...-~~~~~@      ","oy              @@@@@@+~~o      ","+h              @@@@@@@s~s      ","-@               :@@@@@~./      ","                  @@@.~y        ","    h            @N+~~:         ","     ~s-        .~-s~           "],["          -+oooo.               ","       :yNhsdd::hy:             ","    /     @@@@@@@N/~~y~         ","           /@@oo+/ ~~~~h        ","           +d@   / ~~~~~s       ","h/              @~..-~~~~@      ","oy                y@@@@+~o      ","+h                h@@@@@/s      ","-@                ~@@@@../      ","                   @@h~y        ","    h            ~yd/~:         ","     ~s-        -~-s~           "],["          -+oooo.               ","       :y@ds@Ny/yy:             ","    /     .@@@@@@@N/~y~         ","            o@@o+o+~~~~h        ","            /h@@  :~~~~~s       ","h/               o-.--~~~@      ","oy                 @@@@@-o      ","+h                 @@@@@hs      ","-@                 -@@@@./      ","                   h@@oy        ","    d            ~~@d~:         ","     ~s-        .--s~           "],["          -+osso.               ","       :sdNs+dhhds:             ","    /       @@@@N@@:.y~         ","             +@@ooo~~~~h        ","             :@N.  /~~~~s       ","h/                 -.--~~@      ","oy                 ~~@@@so      ","+h                 ~~@@@@h      ","-@                 ~~@@@d/      ","                   ~~@@y        ","    h             ~.@~:         ","     ~s-        ~.-s~           "],["         .ooso+:                ","       :sd@hdd@hys:             ","    /       :@@@@N@@oy~         ","              oh@@s++~~h        ","              :y@@ ~/~~~s       ","h/                  h--~~@      ","oy                  ~@@@@s      ","+h                  ~@@@@@      ","-@                 ~.-@@@/      ","                   ~~@@h        ","    h            ~~~-o:         ","     ~s-        ~~:s~           "],["          -+oooo.               ","       :yhhdssd@sy:             ","    /         @@@@N@yy~         ","               +@@@sy~~h        ","                dN@~~~~~s       ","h/                 ~~:..~@      ","oy                 ~~~@@@h      ","+h                 ~~~N@@@      ","-@.                ~~~.@@/      ","                   ~~.@N        ","    h:           ~~~~ys         ","     ~s-        ~~-s~           "],["          -+ooo+                ","       :ydsdsd@dhs:             ","    /         @@@@@@@h~         ","                ss@yy/~h        ","                :y@@~::~s       ","h/                 ~~~+..@      ","oy                 ~~~~@@@      ","+h                 ~~~~@@@      ","-@                 ~~~~@@/      ","                   ~~~+@        ","    h ~           ~~~yh         ","     ~s-        ~~-s~           "]];
 
 // Kursorni yashirish
 process.stdout.write(HIDE_CURSOR);
 
 // Ctrl + C bosilganda toza chiqish
 process.on('SIGINT', () => {
-  process.stdout.write(CLEAR);
+  process.stdout.write('\x1b[2J\x1b[3J\x1b[H');
   process.stdout.write(SHOW_CURSOR);
   process.exit(0);
 });
@@ -59,14 +58,14 @@ function padVisual(str, targetWidth) {
 }
 
 // ProgressBar yasash
-function createBar(percent, length = 12, color = BRIGHT_GREEN) {
+function createBar(percent, length = 10, color = BRIGHT_GREEN) {
   const filled = Math.max(0, Math.min(length, Math.round((percent / 100) * length)));
   const empty = length - filled;
   return color + '█'.repeat(filled) + DARK_GREEN + '░'.repeat(empty) + RESET;
 }
 
 // Tasodifiy matrix oqimi
-function getMatrixStream(len = 106) {
+function getMatrixStream(len = 96) {
   const chars = '01アイウエオカキクケコサシスセソタチツテト01010101XYZ#%@*';
   let str = '';
   for (let i = 0; i < len; i++) {
@@ -90,9 +89,9 @@ function colorizeEarthLine(line) {
   let res = '';
   for (let ch of line) {
     if (landChars.has(ch)) {
-      res += BRIGHT_GREEN + ch; // Quruqlik / Qit'alar (Yashil)
+      res += BRIGHT_GREEN + ch;
     } else if (oceanChars.has(ch)) {
-      res += CYAN + ch; // Okeanlar (Moviy)
+      res += CYAN + ch;
     } else {
       res += RESET + ch;
     }
@@ -111,6 +110,41 @@ function getLocalIp() {
     }
   }
   return '127.0.0.1';
+}
+
+// Toshkent vaqtini aniqlash (Toshkent vaqti UTC+5)
+function getTashkentTime() {
+  const now = new Date();
+  const options = {
+    timeZone: 'Asia/Tashkent',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    day: '2-digit',
+    month: 'numeric',
+    year: 'numeric',
+    hour12: false
+  };
+  const parts = new Intl.DateTimeFormat('en-GB', options).formatToParts(now);
+  let hh = '00', mm = '00', ss = '00', day = '01', month = '01', year = '2026';
+  for (const p of parts) {
+    if (p.type === 'hour') hh = p.value;
+    if (p.type === 'minute') mm = p.value;
+    if (p.type === 'second') ss = p.value;
+    if (p.type === 'day') day = p.value;
+    if (p.type === 'month') month = p.value;
+    if (p.type === 'year') year = p.value;
+  }
+  const monthsUz = ['Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'Iyun', 'Iyul', 'Avgust', 'Sentabr', 'Oktabr', 'Noyabr', 'Dekabr'];
+  const mIdx = Math.max(0, Math.min(11, parseInt(month) - 1));
+  const monthName = monthsUz[mIdx];
+  const daysUz = ['Yakshanba', 'Dushanba', 'Seshanba', 'Chorshanba', 'Payshanba', 'Juma', 'Shanba'];
+  const dayOfWeek = daysUz[now.getDay()];
+
+  return {
+    hh, mm, ss,
+    dateStr: day + '-' + monthName + ', ' + year + ' // ' + dayOfWeek
+  };
 }
 
 // CPU hisoblash
@@ -145,14 +179,11 @@ const cpuCores = os.cpus().length;
 
 function render() {
   tick++;
-  const now = new Date();
-  const hh = String(now.getHours()).padStart(2, '0');
-  const mm = String(now.getMinutes()).padStart(2, '0');
-  const ss = String(now.getSeconds()).padStart(2, '0');
 
-  // Har sekundda ikki nuqta miltillashi
+  // Aniq Toshkent vaqti
+  const tTime = getTashkentTime();
   const colon = (tick % 2 === 0) ? ':' : ' ';
-  const timeStr = hh + colon + mm + colon + ss;
+  const timeStr = tTime.hh + colon + tTime.mm + colon + tTime.ss;
 
   // Soat raqamlari qatorlari (5 qator)
   const clockLines = ['', '', '', '', ''];
@@ -173,83 +204,72 @@ function render() {
   const uptimeSec = Math.floor(os.uptime());
   const upHours = Math.floor(uptimeSec / 3600);
   const upMins = Math.floor((uptimeSec % 3600) / 60);
-  const upSecs = uptimeSec % 60;
 
-  const months = ['Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'Iyun', 'Iyul', 'Avgust', 'Sentabr', 'Oktabr', 'Noyabr', 'Dekabr'];
-  const days = ['Yakshanba', 'Dushanba', 'Seshanba', 'Chorshanba', 'Payshanba', 'Juma', 'Shanba'];
-  const dateStr = now.getDate() + '-' + months[now.getMonth()] + ', ' + now.getFullYear() + ' // ' + days[now.getDay()];
-
-  // Aylanuvchi Yer shari freymi (har tick'da 1 ta aylanadi)
+  // Aylanuvchi Yer shari freymi
   const earthIndex = tick % earthFrames.length;
   const currentEarthFrame = earthFrames[earthIndex];
 
   // Jonli tarmoq ko'rsatkichlari
-  const netRx = (2.4 + (tick % 7) * 0.4).toFixed(1);
-  const netTx = (1.1 + (tick % 5) * 0.3).toFixed(1);
+  const netRx = (2.1 + (tick % 5) * 0.3).toFixed(1);
+  const netTx = (1.2 + (tick % 4) * 0.2).toFixed(1);
 
-  // Chap tomon (Server Telemetriya qutisi - aniq 54 belgi kenglikda)
-  const ramBar = createBar(ramPercent, 12, CYAN);
-  const cpuBar = createBar(cpuPercent, 12, YELLOW);
+  // Chap tomon (Server Telemetriya qutisi - aniq 54 belgi)
+  const ramBar = createBar(ramPercent, 10, CYAN);
+  const cpuBar = createBar(cpuPercent, 10, YELLOW);
 
   const leftTelemetry = [
     GREEN + '┌──[ ' + WHITE + BOLD + 'SERVER TELEMETRIYA' + RESET + GREEN + ' ]────────────────────────────┐' + RESET,
     GREEN + '│' + RESET + '  🧠 ' + BOLD + 'RAM:' + RESET + '      [' + ramBar + '] ' + CYAN + ramPercent + '%' + RESET + ' (' + Math.round(usedMem / 1024 / 1024) + 'M/' + Math.round(totalMem / 1024 / 1024) + 'M)',
     GREEN + '│' + RESET + '  ⚡️ ' + BOLD + 'CPU:' + RESET + '      [' + cpuBar + '] ' + YELLOW + cpuPercent + '%' + RESET + ' (' + cpuCores + ' Cores)',
     GREEN + '│' + RESET + '  ⚙️ ' + BOLD + 'CHIP:' + RESET + '     ' + WHITE + cpuModel + RESET,
-    GREEN + '│' + RESET + '  ⏱ ' + BOLD + 'UPTIME:' + RESET + '   ' + WHITE + upHours + 's, ' + upMins + 'm, ' + upSecs + 's' + RESET,
+    GREEN + '│' + RESET + '  ⏱ ' + BOLD + 'UPTIME:' + RESET + '   ' + WHITE + upHours + ' soat, ' + upMins + ' daqiqa' + RESET,
     GREEN + '│' + RESET + '  🌐 ' + BOLD + 'LAN IP:' + RESET + '   ' + BRIGHT_CYAN + localIp + RESET,
     GREEN + '│' + RESET + '  📡 ' + BOLD + 'TRAFFIC:' + RESET + '  RX: ' + WHITE + netRx + ' MB/s' + RESET + ' | TX: ' + WHITE + netTx + ' MB/s' + RESET,
     GREEN + '│' + RESET + '  🛡 ' + BOLD + 'FIREWALL:' + RESET + ' ' + BRIGHT_GREEN + 'ACTIVE [PROTECTED]' + RESET,
     GREEN + '│' + RESET + '  🤖 ' + BOLD + 'PM2 BOTS:' + RESET + ' ' + BRIGHT_GREEN + 'ONLINE [2/2 RUNNING]' + RESET,
     GREEN + '│' + RESET + '  🔒 ' + BOLD + 'SSH PORT:' + RESET + ' ' + CYAN + '22 [ENCRYPTED]' + RESET,
-    GREEN + '│' + RESET + '  📍 ' + BOLD + 'REGION:' + RESET + '   ' + WHITE + 'UZBEKISTAN // TASHKENT' + RESET,
-    GREEN + '│' + RESET + '  💾 ' + BOLD + 'PLATFORM:' + RESET + ' ' + WHITE + os.type() + ' ' + os.arch() + RESET,
-    GREEN + '│' + RESET + '  ⚡️ ' + BOLD + 'SECURITY:' + RESET + ' ' + BRIGHT_GREEN + 'ZERO THREAT DETECTED' + RESET,
+    GREEN + '│' + RESET + '  📍 ' + BOLD + 'REGION:' + RESET + '   ' + WHITE + 'UZBEKISTAN // TASHKENT (UTC+5)' + RESET,
     GREEN + '│' + RESET + '  🎯 ' + BOLD + 'IELTS BOT:' + RESET + ' ' + BRIGHT_GREEN + 'ACTIVE & LISTENING' + RESET,
-    GREEN + '│' + RESET + '  🤖 ' + BOLD + 'SRV BOT:' + RESET + '   ' + BRIGHT_GREEN + 'ACTIVE & CONTROLLING' + RESET,
-    GREEN + '│' + RESET + '  🔄 ' + BOLD + 'AUTOPULL:' + RESET + '  ' + WHITE + 'STANDBY & READY' + RESET,
-    GREEN + '│' + RESET + '  💾 ' + BOLD + 'MEM SWAP:' + RESET + '  ' + BRIGHT_GREEN + 'CLEAN [0% USED]' + RESET,
-    GREEN + '│' + RESET + '  📊 ' + BOLD + 'LOAD AVG:' + RESET + '  ' + WHITE + '0.15, 0.22, 0.18' + RESET,
     GREEN + '│' + RESET + '  STATUS:    ' + BRIGHT_GREEN + '24/7 CONTINUOUS SURVEILLANCE' + RESET,
-    GREEN + '│' + RESET + '  DEFENSE:   ' + BRIGHT_CYAN + 'MAXIMUM ENCRYPTION (AES-256)' + RESET,
     GREEN + '└─────────────────────────────────────────────────────┘' + RESET
   ];
 
-  // O'ng tomon: Katta Aylanuvchi Yer shari qutisi (48 belgi kenglikda)
+  // O'ng tomon: Aylanuvchi Yer shari qutisi
   const rightEarthBox = [
-    GREEN + '┌──[ ' + CYAN + BOLD + '🌍 PLANET EARTH // LIVE 360 ROTATION' + RESET + GREEN + ' ]────────┐' + RESET,
+    GREEN + '┌──[ ' + CYAN + BOLD + '🌍 PLANET EARTH // LIVE ROTATION' + RESET + GREEN + ' ]──┐' + RESET,
     ...currentEarthFrame.map(line => {
       const colored = colorizeEarthLine(line);
-      return GREEN + '│ ' + RESET + padVisual(colored, 48) + GREEN + ' │' + RESET;
+      return GREEN + '│ ' + RESET + padVisual(colored, 36) + GREEN + ' │' + RESET;
     }),
-    GREEN + '└──────────────────────────────────────────────────┘' + RESET
+    GREEN + '└────────────────────────────────────────┘' + RESET
   ];
 
-  let out = CLEAR;
+  // Butun ekranni va scrollback buferni tozalash va (1,1) ga o'tish
+  let out = '\x1b[2J\x1b[3J\x1b[H';
 
-  // 1. Sarlavha (Header HUD)
-  out += GREEN + '╔════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗' + RESET + '\n';
-  out += GREEN + '║  ' + BRIGHT_GREEN + BOLD + '[●] KALI CYBER TERMINAL' + RESET + '  ' + DARK_GREEN + '//' + RESET + '  ' + CYAN + 'NODE: ' + os.hostname() + RESET + '  ' + DARK_GREEN + '//' + RESET + '  ' + YELLOW + 'SYSTEM: 24/7 ONLINE' + RESET + '  ' + DARK_GREEN + '//' + RESET + '  ' + BRIGHT_GREEN + 'SHIELD: MAXIMUM' + RESET + '  ' + GREEN + '║' + RESET + '\n';
-  out += GREEN + '╚════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝' + RESET + '\n\n';
+  // 1. Sarlavha (Header HUD - 3 qator)
+  out += GREEN + '╔══════════════════════════════════════════════════════════════════════════════════════════════════════╗' + RESET + '\n';
+  out += GREEN + '║  ' + BRIGHT_GREEN + BOLD + '[●] KALI CYBER TERMINAL' + RESET + '  ' + DARK_GREEN + '//' + RESET + '  ' + CYAN + 'NODE: ' + os.hostname() + RESET + '  ' + DARK_GREEN + '//' + RESET + '  ' + YELLOW + 'TASHKENT (UTC+5)' + RESET + '  ' + DARK_GREEN + '//' + RESET + '  ' + BRIGHT_GREEN + 'SHIELD: ON' + RESET + '  ' + GREEN + '║' + RESET + '\n';
+  out += GREEN + '╚══════════════════════════════════════════════════════════════════════════════════════════════════════╝' + RESET + '\n';
 
-  // 2. Matrix Stream 1
-  out += '  ' + getMatrixStream(108) + '\n\n';
+  // 2. Matrix Stream (1 qator)
+  out += '  ' + getMatrixStream(96) + '\n';
 
-  // 3. Soat (Markazda katta raqamlar)
+  // 3. Soat (5 qator)
   for (const line of clockLines) {
     out += '   ' + BRIGHT_GREEN + BOLD + line + RESET + '\n';
   }
-  out += '\n   ' + CYAN + BOLD + '>>> ' + dateStr.toUpperCase() + ' <<<' + RESET + '\n\n';
+  out += '   ' + CYAN + BOLD + '>>> ' + tTime.dateStr.toUpperCase() + ' <<<' + RESET + '\n';
 
-  // 4. Matrix Stream 2
-  out += '  ' + getMatrixStream(108) + '\n\n';
+  // 4. Matrix Stream (1 qator)
+  out += '  ' + getMatrixStream(96) + '\n';
 
-  // 5. Yonma-yon: Chapda 21 qator Telemetriya | O'ngda 21 qator KATTA Yer Shari!
+  // 5. Yonma-yon: Chapda 14 qator Telemetriya | O'ngda 14 qator Aylanuvchi Yer Shari
   const maxRows = Math.max(leftTelemetry.length, rightEarthBox.length);
   for (let i = 0; i < maxRows; i++) {
     const left = padVisual(leftTelemetry[i] || '', 55);
     const right = rightEarthBox[i] || '';
-    out += ' ' + left + '   ' + right + '\n';
+    out += ' ' + left + '   ' + right + (i === maxRows - 1 ? '' : '\n');
   }
 
   process.stdout.write(out);
