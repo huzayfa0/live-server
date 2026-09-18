@@ -7,6 +7,13 @@
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd "$DIR"
 
+export DISPLAY="${DISPLAY:-:0}"
+export XAUTHORITY="${XAUTHORITY:-$HOME/.Xauthority}"
+[ -f /root/.Xauthority ] && [ "$USER" = "root" ] && export XAUTHORITY=/root/.Xauthority
+
+# Eski matnli soatni to'xtatish
+pkill -f "node clock.js" >/dev/null 2>&1
+
 echo "[*] Kali Cyber Dashboard serveri tekshirilmoqda..."
 
 # 1. dashboard-server.js ishlayaptimi tekshirish
@@ -19,10 +26,6 @@ else
 fi
 
 URL="http://localhost:3000"
-
-export DISPLAY="${DISPLAY:-:0}"
-export XAUTHORITY="${XAUTHORITY:-$HOME/.Xauthority}"
-[ -f /root/.Xauthority ] && [ "$USER" = "root" ] && export XAUTHORITY=/root/.Xauthority
 
 # 2. To'liq ekranda (Kiosk) brauzerni ishga tushirish
 echo "[*] Brauzer to'liq ekranda ($DISPLAY) ochilmoqda..."
