@@ -1,8 +1,6 @@
 #!/usr/bin/env node
 
 const os = require('os');
-const path = require('path');
-const fs = require('fs');
 
 // ANSI rang kodlari
 const GREEN = '\x1b[32m';
@@ -13,6 +11,7 @@ const BRIGHT_CYAN = '\x1b[96;1m';
 const BLUE = '\x1b[94m';
 const WHITE = '\x1b[97m';
 const YELLOW = '\x1b[93m';
+const RED = '\x1b[91;1m';
 const RESET = '\x1b[0m';
 const BOLD = '\x1b[1m';
 const HIDE_CURSOR = '\x1b[?25l';
@@ -34,18 +33,6 @@ const font = {
   ' ': ['  ', '  ', '  ', '  ', '  ']
 };
 
-// Yer shari freymlarini yuklash (24 freym x 20 qator x 46 ustun)
-let earthFrames;
-try {
-  earthFrames = require('./earth_frames.json');
-} catch (e) {
-  try {
-    earthFrames = JSON.parse(fs.readFileSync(path.join(__dirname, 'earth_frames.json'), 'utf8'));
-  } catch (err) {
-    earthFrames = [];
-  }
-}
-
 // Kursorni yashirish
 process.stdout.write(HIDE_CURSOR);
 
@@ -61,11 +48,17 @@ function stripAnsi(str) {
   return str.replace(/\x1b\[[0-9;]*m/g, '');
 }
 
-// Quti qatorini yasash (chap va o'ng ramkalar '│ ' va ' │' bilan aniq 50 belgi)
-function makeBoxRow(content, innerWidth = 46) {
-  const plain = stripAnsi(content);
-  const pad = innerWidth > plain.length ? ' '.repeat(innerWidth - plain.length) : '';
-  return GREEN + '│ ' + RESET + content + pad + GREEN + ' │' + RESET;
+// Aniq katakka moslashtirish (kesish yoki to'ldirish)
+function fitCell(str, width) {
+  const plain = stripAnsi(str);
+  if (plain.length === width) return str;
+  if (plain.length < width) return str + ' '.repeat(width - plain.length);
+  return plain.slice(0, width);
+}
+
+// Quti qatorini yasash
+function makeBoxRow(content, innerWidth, borderColor = GREEN) {
+  return borderColor + '│ ' + RESET + fitCell(content, innerWidth) + borderColor + ' │' + RESET;
 }
 
 // ProgressBar yasash
@@ -76,7 +69,7 @@ function createBar(percent, length = 10, color = BRIGHT_GREEN) {
 }
 
 // Tasodifiy matrix oqimi
-function getMatrixStream(len = 98) {
+function getMatrixStream(len = 110) {
   const chars = '01XYZ#%@*0101アイウエオカキクケコサシスセソタチツテト';
   let str = '';
   for (let i = 0; i < len; i++) {
@@ -87,24 +80,6 @@ function getMatrixStream(len = 98) {
     else str += DARK_GREEN + ch + RESET;
   }
   return str;
-}
-
-// Yer sharini rangli qilish (Quruqlik - Yashil, Okean - Moviy)
-const landChars = new Set(['@', 'N', 'd', 'h', 'y', 's', 'm', 'b', 'q', 'p', 'w', 'Z', 'Y']);
-const oceanChars = new Set(['.', '-', '~', '/', '+', ':', 'o', '*']);
-
-function colorizeEarthLine(line) {
-  let res = '';
-  for (let ch of line) {
-    if (landChars.has(ch)) {
-      res += BRIGHT_GREEN + ch;
-    } else if (oceanChars.has(ch)) {
-      res += CYAN + ch;
-    } else {
-      res += RESET + ch;
-    }
-  }
-  return res + RESET;
 }
 
 // Mahalliy IP ni topish
@@ -179,16 +154,137 @@ function getCpuPercent() {
   return Math.min(100, Math.max(0, Math.round(((diffTotal - diffIdle) / diffTotal) * 100)));
 }
 
+// -------------------------------------------------------------
+// 4 TA CCTV KAMERA MULTIVIEWER (JONLI KO'CHA VA TRANSPORT VEDIOSI)
+// -------------------------------------------------------------
+
+// CAM-01: AMIR TEMUR SHOH KO'CHASI (HARAKATLANUVCHI AVTO OQIMI)
+const roadEast1 = '   __/\\_            .---.            _o__o_          __       ';
+const roadEast2 = '  =(o)(o)=         (o)-(o)          (=)-(==)        (oo)===   ';
+const roadWest1 = '     _o__o_            .---.            __/\\_         _o__o_  ';
+const roadWest2 = '    (=)-(==)          (o)-(o)          =(o)(o)=      (=)-(==) ';
+
+function getCam1(tick, timeStr) {
+  const lenE = roadEast1.length;
+  const offE = (tick * 2) % lenE;
+  const offW = (lenE - ((tick * 2) % lenE)) % lenE;
+  const recState = (tick % 2 === 0) ? RED + '● REC' + RESET : DARK_GREEN + '○ REC' + RESET;
+
+  return [
+    '  ' + BRIGHT_CYAN + BOLD + '[●] CAM-01: SHOH KUCHA' + RESET + ' ' + recState,
+    '  1080p 25FPS ' + WHITE + timeStr + RESET,
+    '  ' + YELLOW + '>> SHARQQA (50 KM/S)' + RESET,
+    '  ' + (roadEast1 + roadEast1).slice(offE, offE + 27),
+    '  ' + (roadEast2 + roadEast2).slice(offE, offE + 27),
+    '  ' + DARK_GREEN + '- - - - - - - - - - - - - -' + RESET,
+    '  ' + (roadWest1 + roadWest1).slice(offW, offW + 27),
+    '  ' + (roadWest2 + roadWest2).slice(offW, offW + 27),
+    '  ' + BRIGHT_GREEN + '[TRAFFIC: NORMAL - 4 CARS]' + RESET
+  ];
+}
+
+// CAM-02: CHORSU CHORRAHASI (PIYODALAR YO'LAKCHASI VA SVETOFOR)
+const lights = [RED + '[🔴 QIZIL ]' + RESET, YELLOW + '[🟡 SARIQ ]' + RESET, BRIGHT_GREEN + '[🟢 YASHIL]' + RESET];
+const pedStrip1 = '    o       o       o       o       o       o    ';
+const p2rawA = '   /|\\     /|      /|\\     <|>     /|      /|\\   ';
+const p2rawB = '   <|>     /|\\     <|>     /|      /|\\     <|>   ';
+const p3rawA = '   / \\     / |     / \\      |      / \\     / |   ';
+const p3rawB = '   | \\     / \\     | \\     / \\     | \\     / \\   ';
+
+function getCam2(tick, timeStr) {
+  const curLight = lights[Math.floor((tick % 9) / 3)];
+  const offP = (tick * 2) % pedStrip1.length;
+  const p1 = (pedStrip1 + pedStrip1).slice(offP, offP + 27);
+  const p2raw = (tick % 2 === 0) ? p2rawA : p2rawB;
+  const p2 = (p2raw + p2raw).slice(offP, offP + 27);
+  const p3raw = (tick % 2 === 0) ? p3rawA : p3rawB;
+  const p3 = (p3raw + p3raw).slice(offP, offP + 27);
+  const recState = (tick % 2 === 0) ? RED + '● REC' + RESET : DARK_GREEN + '○ REC' + RESET;
+
+  const isRed = Math.floor((tick % 9) / 3) === 0;
+  const carWait = isRed 
+    ? YELLOW + '[AVTO KUTMOQDA]' + RESET + ' _o_ (o-o)'
+    : BRIGHT_GREEN + '[AVTO O\'TMOQDA]' + RESET + ' >>> __/\\_';
+
+  return [
+    '  ' + BRIGHT_CYAN + BOLD + '[●] CAM-02: PIYODALAR' + RESET + '  ' + recState,
+    '  1080p 25FPS ' + WHITE + timeStr + RESET,
+    '  ' + curLight + '   💡   💡   💡',
+    '  ' + p1,
+    '  ' + p2,
+    '  ' + p3,
+    '  ' + WHITE + ' ═══  ═══  ═══  ═══  ═══ ' + RESET,
+    '  ' + carWait,
+    '  ' + CYAN + '[PIYODALAR: 6 HARAKATDA]' + RESET
+  ];
+}
+
+// CAM-03: KIRISH DARVOZASI (SHLAGBAUM VA AVTO TEKSHIRUV)
+function getCam3(tick, timeStr) {
+  const isOpen = (Math.floor(tick / 4) % 2 === 0);
+  const barrier = isOpen 
+    ? BRIGHT_GREEN + '[SHLAGBAUM: OCHIQ]' + RESET + '   \\    ' 
+    : RED + '[SHLAGBAUM: YOPUK]' + RESET + '  ──────';
+  
+  const carPos = (tick % 6) * 3;
+  const c3_1 = (' '.repeat(carPos) + ' __/\\_ ').slice(0, 27);
+  const c3_2 = (' '.repeat(carPos) + '=(o)(o)=').slice(0, 27);
+  const plates = ['01|A777AA', '01|B123BB', '01|Z999ZZ', '01|M555MM'];
+  const plate = plates[Math.floor(tick / 6) % plates.length];
+  const recState = (tick % 2 === 0) ? RED + '● REC' + RESET : DARK_GREEN + '○ REC' + RESET;
+
+  return [
+    '  ' + BRIGHT_CYAN + BOLD + '[●] CAM-03: KIRISH' + RESET + '     ' + recState,
+    '  1080p 25FPS ' + WHITE + timeStr + RESET,
+    '  ' + CYAN + '[NAZORAT]' + RESET + '   o/  ' + YELLOW + '[QOROVUL]' + RESET,
+    '  ' + barrier,
+    '  ' + c3_1,
+    '  ' + c3_2,
+    '  ' + DARK_GREEN + '═══════════════════════════' + RESET,
+    '  ' + CYAN + '[SCAN: ' + WHITE + plate + CYAN + ']' + RESET + ' ' + BRIGHT_GREEN + '[OK]' + RESET,
+    '  ' + BRIGHT_GREEN + '[RUXSAT: TASDIQLANDI - 100%]' + RESET
+  ];
+}
+
+// CAM-04: AVTO TURARGOH (PARKOVKA VA HARAKAT SENSORI)
+const radarIcons = ['[RADAR: ◴ ]', '[RADAR: ◷ ]', '[RADAR: ◶ ]', '[RADAR: ◵ ]'];
+
+function getCam4(tick, timeStr) {
+  const rIcon = radarIcons[tick % 4];
+  const pedX = (tick * 3) % 18;
+  const p4_1 = (' '.repeat(pedX) + '  o   ' + YELLOW + '[HAYDOVCHI]' + RESET).slice(0, 37);
+  const p4_2 = (' '.repeat(pedX) + ' /|\\').slice(0, 27);
+  const p4_3 = (' '.repeat(pedX) + ' / \\').slice(0, 27);
+  const recState = (tick % 2 === 0) ? RED + '● REC' + RESET : DARK_GREEN + '○ REC' + RESET;
+
+  return [
+    '  ' + BRIGHT_CYAN + BOLD + '[●] CAM-04: TURARGOH' + RESET + '   ' + recState,
+    '  1080p 25FPS ' + WHITE + timeStr + RESET,
+    '  ' + WHITE + '| P1:o=o | P2:o=o | P3:BOSH |' + RESET,
+    '  ' + p4_1,
+    '  ' + p4_2,
+    '  ' + p4_3,
+    '  ' + DARK_GREEN + '---------------------------' + RESET,
+    '  ' + CYAN + rIcon + RESET + ' BO\'SH: ' + BRIGHT_GREEN + '14' + RESET + ' / ' + WHITE + '36' + RESET,
+    '  ' + YELLOW + '[XAVFSIZLIK: SHUBHA YO\'Q]' + RESET
+  ];
+}
+
+// CCTV Qatorini birlashtirish (har biri 29 belgi, jami 66 belgi)
+function makeCctvRow(left, right) {
+  return GREEN + '│ ' + RESET + fitCell(left, 29) + GREEN + ' ││ ' + RESET + fitCell(right, 29) + GREEN + ' │' + RESET;
+}
+
 let tick = 0;
 const localIp = getLocalIp();
 const cpuRaw = os.cpus()[0]?.model || 'Intel(R) CPU';
-const cpuModel = cpuRaw.split('@')[0].trim().slice(0, 24);
+const cpuModel = cpuRaw.split('@')[0].trim().slice(0, 20);
 const cpuCores = os.cpus().length;
 
 function render() {
   tick++;
 
-  // Aniq Toshkent vaqti
+  // Aniq Toshkent vaqti (Asia/Tashkent UTC+5)
   const tTime = getTashkentTime();
   const colon = (tick % 2 === 0) ? ':' : ' ';
   const timeStr = tTime.hh + colon + tTime.mm + colon + tTime.ss;
@@ -214,13 +310,9 @@ function render() {
   const upMins = Math.floor((uptimeSec % 3600) / 60);
   const upSecs = uptimeSec % 60;
 
-  // Aylanuvchi Yer shari freymi
-  const earthIndex = tick % (earthFrames.length || 1);
-  const currentEarthFrame = earthFrames[earthIndex] || [];
-
   // Jonli tarmoq ko'rsatkichlari
-  const netRx = (3.2 + (tick % 7) * 0.4).toFixed(1);
-  const netTx = (1.4 + (tick % 5) * 0.3).toFixed(1);
+  const netRx = (3.4 + (tick % 7) * 0.4).toFixed(1);
+  const netTx = (1.5 + (tick % 5) * 0.3).toFixed(1);
 
   // ProgressBarlar
   const ramBar = createBar(ramPercent, 10, CYAN);
@@ -228,72 +320,86 @@ function render() {
   const diskBar = createBar(18, 12, CYAN);
   const swapBar = createBar(0, 12, BRIGHT_GREEN);
 
-  // 1. Sarlavha HUD (3 qator, eni 102)
+  // 1. Sarlavha HUD (Eni 114)
   const hostStr = os.hostname().slice(0, 10);
-  const h2_content = '  [●] KALI CYBER TERMINAL  //  NODE: ' + hostStr + '  //  TASHKENT (UTC+5)  //  DEFENSE: ACTIVE';
-  const h2_pad = Math.max(0, 100 - h2_content.length);
+  const h2_content = '  ' + BRIGHT_GREEN + BOLD + '[●] KALI CYBER TERMINAL' + RESET + '  ' + DARK_GREEN + '//' + RESET + '  ' + CYAN + 'NODE: ' + hostStr + RESET + '  ' + DARK_GREEN + '//' + RESET + '  ' + YELLOW + 'TASHKENT (UTC+5)' + RESET + '  ' + DARK_GREEN + '//' + RESET + '  ' + RED + '● CCTV 4-CH LIVE' + RESET + '  ' + DARK_GREEN + '//' + RESET + '  ' + BRIGHT_GREEN + 'DEFENSE: ACTIVE' + RESET;
   const topBanner = [
-    GREEN + '╔' + '═'.repeat(100) + '╗' + RESET,
-    GREEN + '║' + RESET + '  ' + BRIGHT_GREEN + BOLD + '[●] KALI CYBER TERMINAL' + RESET + '  ' + DARK_GREEN + '//' + RESET + '  ' + CYAN + 'NODE: ' + hostStr + RESET + '  ' + DARK_GREEN + '//' + RESET + '  ' + YELLOW + 'TASHKENT (UTC+5)' + RESET + '  ' + DARK_GREEN + '//' + RESET + '  ' + BRIGHT_GREEN + 'DEFENSE: ACTIVE' + RESET + ' '.repeat(h2_pad) + GREEN + '║' + RESET,
-    GREEN + '╚' + '═'.repeat(100) + '╝' + RESET
+    GREEN + '╔' + '═'.repeat(112) + '╗' + RESET,
+    GREEN + '║' + RESET + fitCell(h2_content, 112) + GREEN + '║' + RESET,
+    GREEN + '╚' + '═'.repeat(112) + '╝' + RESET
   ];
 
   // 2. Matrix va Katta 3D Soat (7 qator)
-  const matrix1 = '  ' + getMatrixStream(98) + '  ';
-  const centeredClock = clockLines.map(line => ' '.repeat(17) + BRIGHT_GREEN + BOLD + line + RESET);
+  const matrix1 = '  ' + getMatrixStream(110) + '  ';
+  const centeredClock = clockLines.map(line => ' '.repeat(23) + BRIGHT_GREEN + BOLD + line + RESET);
   const dateStr = '>>> ' + tTime.dateStr.toUpperCase() + ' // ASIA/TASHKENT (UTC+5) <<<';
-  const centeredDate = ' '.repeat(Math.max(0, Math.floor((102 - dateStr.length) / 2))) + CYAN + BOLD + dateStr + RESET;
-  const matrix2 = '  ' + getMatrixStream(98) + '  ';
+  const centeredDate = ' '.repeat(Math.max(0, Math.floor((114 - dateStr.length) / 2))) + CYAN + BOLD + dateStr + RESET;
+  const matrix2 = '  ' + getMatrixStream(110) + '  ';
 
-  // 3. O'rta yonma-yon qismlar: Telemetriya (chapda 50) + Yer shari (o'ngda 50) (22 qator)
+  // 3. O'rta qism: Chapda Telemetriya (46 belgi) | O'ngda 4 ta CCTV Kameralar (66 belgi) -> Jami 114
   const leftTelemetry = [
-    GREEN + '┌──[ ' + WHITE + BOLD + 'SERVER TELEMETRIYA' + RESET + GREEN + ' ]────────────────────────┐' + RESET,
-    makeBoxRow('[●] ' + BOLD + 'RAM:' + RESET + '      [' + ramBar + '] ' + CYAN + ramPercent + '%' + RESET + ' (' + Math.round(usedMem / 1024 / 1024) + 'M/' + Math.round(totalMem / 1024 / 1024) + 'M)'),
-    makeBoxRow('[●] ' + BOLD + 'CPU:' + RESET + '      [' + cpuBar + '] ' + YELLOW + cpuPercent + '%' + RESET + ' (' + cpuCores + ' Cores)'),
-    makeBoxRow('[●] ' + BOLD + 'CHIP:' + RESET + '     ' + WHITE + cpuModel + RESET),
-    makeBoxRow('[●] ' + BOLD + 'UPTIME:' + RESET + '   ' + WHITE + upHours + 'h ' + upMins + 'm ' + upSecs + 's' + RESET),
-    makeBoxRow('[●] ' + BOLD + 'LAN IP:' + RESET + '   ' + BRIGHT_CYAN + localIp + RESET),
-    makeBoxRow('[●] ' + BOLD + 'TRAFFIC:' + RESET + '  RX: ' + WHITE + netRx + ' MB/s' + RESET + ' | TX: ' + WHITE + netTx + ' MB/s' + RESET),
-    makeBoxRow('[●] ' + BOLD + 'FIREWALL:' + RESET + ' ' + BRIGHT_GREEN + 'ACTIVE [MAXIMUM SHIELD]' + RESET),
-    makeBoxRow('[●] ' + BOLD + 'PM2 BOTS:' + RESET + ' ' + BRIGHT_GREEN + 'ONLINE [2/2 RUNNING]' + RESET),
-    makeBoxRow('[●] ' + BOLD + 'SSH PORT:' + RESET + ' ' + CYAN + '22 [ENCRYPTED - ACTIVE]' + RESET),
-    makeBoxRow('[●] ' + BOLD + 'REGION:' + RESET + '   ' + WHITE + 'UZBEKISTAN // TASHKENT' + RESET),
-    makeBoxRow('[●] ' + BOLD + 'IELTS BOT:' + RESET + ' ' + BRIGHT_GREEN + 'ACTIVE & LISTENING' + RESET),
-    makeBoxRow('[●] ' + BOLD + 'SRV BOT:' + RESET + '   ' + BRIGHT_GREEN + 'ACTIVE & CONTROLLING' + RESET),
-    makeBoxRow('[●] ' + BOLD + 'PLATFORM:' + RESET + ' ' + WHITE + 'Linux x64 (' + os.type() + ')' + RESET),
-    makeBoxRow('[●] ' + BOLD + 'LOAD AVG:' + RESET + ' ' + WHITE + '0.15, 0.22, 0.18' + RESET),
-    makeBoxRow('[●] ' + BOLD + 'MEM SWAP:' + RESET + ' ' + BRIGHT_GREEN + 'CLEAN [0% USED - 2.0GB]' + RESET),
-    makeBoxRow('[●] ' + BOLD + 'ROOT DISK:' + RESET + ' ' + CYAN + '19G / 110G [18% USED]' + RESET),
-    makeBoxRow('[●] ' + BOLD + 'SECURITY:' + RESET + ' ' + BRIGHT_GREEN + 'ZERO THREAT DETECTED' + RESET),
-    makeBoxRow('[●] ' + BOLD + 'DEFENSE:' + RESET + '  ' + BRIGHT_CYAN + 'MAXIMUM ENCRYPTION (AES-256)' + RESET),
-    makeBoxRow('[●] ' + BOLD + 'STATUS:' + RESET + '   ' + BRIGHT_GREEN + '24/7 CONTINUOUS SURVEILLANCE' + RESET),
-    makeBoxRow('[●] ' + BOLD + 'NETWORK:' + RESET + '  ' + WHITE + 'HIGH-SPEED ETH (1000Mbps)' + RESET),
-    GREEN + '└' + '─'.repeat(48) + '┘' + RESET
+    GREEN + '┌──[ ' + WHITE + BOLD + 'SERVER TELEMETRIYA' + RESET + GREEN + ' ]' + '─'.repeat(20) + '┐' + RESET,
+    makeBoxRow('[●] ' + BOLD + 'RAM:' + RESET + '      [' + ramBar + '] ' + CYAN + ramPercent + '%' + RESET + ' (' + Math.round(usedMem / 1024 / 1024) + 'M/' + Math.round(totalMem / 1024 / 1024) + 'M)', 42),
+    makeBoxRow('[●] ' + BOLD + 'CPU:' + RESET + '      [' + cpuBar + '] ' + YELLOW + cpuPercent + '%' + RESET + ' (' + cpuCores + ' Cores)', 42),
+    makeBoxRow('[●] ' + BOLD + 'CHIP:' + RESET + '     ' + WHITE + cpuModel + RESET, 42),
+    makeBoxRow('[●] ' + BOLD + 'UPTIME:' + RESET + '   ' + WHITE + upHours + 'h ' + upMins + 'm ' + upSecs + 's' + RESET, 42),
+    makeBoxRow('[●] ' + BOLD + 'LAN IP:' + RESET + '   ' + BRIGHT_CYAN + localIp + RESET, 42),
+    makeBoxRow('[●] ' + BOLD + 'TRAFFIC:' + RESET + '  RX: ' + WHITE + netRx + ' MB/s' + RESET + ' | TX: ' + WHITE + netTx + ' MB/s' + RESET, 42),
+    makeBoxRow('[●] ' + BOLD + 'FIREWALL:' + RESET + ' ' + BRIGHT_GREEN + 'ACTIVE [MAXIMUM SHIELD]' + RESET, 42),
+    makeBoxRow('[●] ' + BOLD + 'PM2 BOTS:' + RESET + ' ' + BRIGHT_GREEN + 'ONLINE [2/2 RUNNING]' + RESET, 42),
+    makeBoxRow('[●] ' + BOLD + 'SSH PORT:' + RESET + ' ' + CYAN + '22 [ENCRYPTED - ACTIVE]' + RESET, 42),
+    makeBoxRow('[●] ' + BOLD + 'REGION:' + RESET + '   ' + WHITE + 'UZBEKISTAN // TASHKENT' + RESET, 42),
+    makeBoxRow('[●] ' + BOLD + 'IELTS BOT:' + RESET + ' ' + BRIGHT_GREEN + 'ACTIVE & LISTENING' + RESET, 42),
+    makeBoxRow('[●] ' + BOLD + 'SRV BOT:' + RESET + '   ' + BRIGHT_GREEN + 'ACTIVE & CONTROLLING' + RESET, 42),
+    makeBoxRow('[●] ' + BOLD + 'PLATFORM:' + RESET + ' ' + WHITE + 'Linux x64 (' + os.type() + ')' + RESET, 42),
+    makeBoxRow('[●] ' + BOLD + 'LOAD AVG:' + RESET + ' ' + WHITE + '0.15, 0.22, 0.18' + RESET, 42),
+    makeBoxRow('[●] ' + BOLD + 'MEM SWAP:' + RESET + ' ' + BRIGHT_GREEN + 'CLEAN [0% USED - 2.0GB]' + RESET, 42),
+    makeBoxRow('[●] ' + BOLD + 'ROOT DISK:' + RESET + ' ' + CYAN + '19G / 110G [18% USED]' + RESET, 42),
+    makeBoxRow('[●] ' + BOLD + 'SECURITY:' + RESET + ' ' + BRIGHT_GREEN + 'ZERO THREAT DETECTED' + RESET, 42),
+    makeBoxRow('[●] ' + BOLD + 'DEFENSE:' + RESET + '  ' + BRIGHT_CYAN + 'MAXIMUM ENCRYPTION ACTIVE' + RESET, 42),
+    makeBoxRow('[●] ' + BOLD + 'CCTV NET:' + RESET + ' ' + RED + '4 CHANNELS STREAMING' + RESET, 42),
+    GREEN + '└' + '─'.repeat(44) + '┘' + RESET
   ];
 
-  const rightEarthBox = [
-    GREEN + '┌──[ ' + CYAN + BOLD + 'PLANET EARTH // LIVE 360 ROTATION' + RESET + GREEN + ' ]─────────┐' + RESET,
-    ...currentEarthFrame.map(l => makeBoxRow(colorizeEarthLine(l), 46)),
-    GREEN + '└' + '─'.repeat(48) + '┘' + RESET
+  // 4 ta CCTV Kameralar qutisi (66 belgi kenglik, 21 qator)
+  const cam1 = getCam1(tick, timeStr);
+  const cam2 = getCam2(tick, timeStr);
+  const cam3 = getCam3(tick, timeStr);
+  const cam4 = getCam4(tick, timeStr);
+
+  const cctvBox = [
+    GREEN + '┌──[ ' + CYAN + BOLD + 'CCTV XAVFSIZLIK KAMERALARI // 4-CH LIVE' + RESET + GREEN + ' ]' + '─'.repeat(19) + '┐' + RESET
   ];
+
+  for (let i = 0; i < 9; i++) {
+    cctvBox.push(makeCctvRow(cam1[i], cam2[i]));
+  }
+
+  cctvBox.push(GREEN + '├─── CAM-01 / CAM-02 ' + '─'.repeat(10) + '┼┼─── CAM-03 / CAM-04 ' + '─'.repeat(12) + '┤' + RESET);
+
+  for (let i = 0; i < 9; i++) {
+    cctvBox.push(makeCctvRow(cam3[i], cam4[i]));
+  }
+
+  cctvBox.push(GREEN + '└' + '─'.repeat(64) + '┘' + RESET);
 
   // 4. Matrix ajratgich (1 qator)
-  const matrix3 = '  ' + getMatrixStream(98) + '  ';
+  const matrix3 = '  ' + getMatrixStream(110) + '  ';
 
-  // 5. Pastki to'ldiruvchi panellar: PM2 / Disk + Tarmoq / Jonli Loglar (12 qator)
+  // 5. Pastki to'ldiruvchi panellar: PM2 / Disk (54 belgi) + Tarmoq / Loglar (58 belgi) -> Jami 114
   const bottomLeft = [
-    GREEN + '┌──[ ' + WHITE + BOLD + 'PM2 JARAYONLAR VA DISK TIZIMI' + RESET + GREEN + ' ]─────────────┐' + RESET,
-    makeBoxRow('[●] express-ielts-bot  ' + BRIGHT_GREEN + '● ONLINE' + RESET + ' (PID: 1420)'),
-    makeBoxRow('    RAM: 104MB | CPU: 0.2% | Uptime: ' + upHours + 'h ' + upMins + 'm'),
-    makeBoxRow('[●] server-controller  ' + BRIGHT_GREEN + '● ONLINE' + RESET + ' (PID: 1894)'),
-    makeBoxRow('    RAM: 103MB | CPU: 0.4% | Uptime: ' + upHours + 'h ' + upMins + 'm'),
-    makeBoxRow(DARK_GREEN + '─'.repeat(46) + RESET),
-    makeBoxRow('[●] ROOT DISK (/): ' + CYAN + '19G / 110G (18% BAND)' + RESET),
-    makeBoxRow('    [' + diskBar + '] ' + WHITE + '86G BO\'SH' + RESET),
-    makeBoxRow('[●] SWAP XOTIRA:   ' + BRIGHT_GREEN + '0% USED [CLEAN]' + RESET),
-    makeBoxRow('    [' + swapBar + '] ' + WHITE + '2.0G BO\'SH' + RESET),
-    makeBoxRow('[●] REPO: ' + WHITE + 'github.com/huzayfa0/live-server' + RESET),
-    GREEN + '└' + '─'.repeat(48) + '┘' + RESET
+    GREEN + '┌──[ ' + WHITE + BOLD + 'PM2 JARAYONLAR VA DISK TIZIMI' + RESET + GREEN + ' ]' + '─'.repeat(17) + '┐' + RESET,
+    makeBoxRow('[●] express-ielts-bot  ' + BRIGHT_GREEN + '● ONLINE' + RESET + ' (PID: 1420)', 50),
+    makeBoxRow('    RAM: 104MB | CPU: 0.2% | Uptime: ' + upHours + 'h ' + upMins + 'm', 50),
+    makeBoxRow('[●] server-controller  ' + BRIGHT_GREEN + '● ONLINE' + RESET + ' (PID: 1894)', 50),
+    makeBoxRow('    RAM: 103MB | CPU: 0.4% | Uptime: ' + upHours + 'h ' + upMins + 'm', 50),
+    makeBoxRow(DARK_GREEN + '─'.repeat(50) + RESET, 50),
+    makeBoxRow('[●] ROOT DISK (/): ' + CYAN + '19G / 110G (18% BAND)' + RESET, 50),
+    makeBoxRow('    [' + diskBar + '] ' + WHITE + '86G BO\'SH' + RESET, 50),
+    makeBoxRow('[●] SWAP XOTIRA:   ' + BRIGHT_GREEN + '0% USED [CLEAN]' + RESET, 50),
+    makeBoxRow('    [' + swapBar + '] ' + WHITE + '2.0G BO\'SH' + RESET, 50),
+    makeBoxRow('[●] REPO: ' + WHITE + 'github.com/huzayfa0/live-server' + RESET, 50),
+    GREEN + '└' + '─'.repeat(52) + '┘' + RESET
   ];
 
   // Aylanuvchi jonli loglar
@@ -306,24 +412,24 @@ function render() {
   ];
 
   const bottomRight = [
-    GREEN + '┌──[ ' + WHITE + BOLD + 'TARMOQ VA JONLI MONITORING' + RESET + GREEN + ' ]────────────────┐' + RESET,
-    makeBoxRow('[●] INTERFACE: ' + WHITE + 'eth0 [1000 Mbps Full-Duplex]' + RESET),
-    makeBoxRow('[●] PACKETS:   ' + CYAN + 'RX: 154.2K' + RESET + ' | ' + YELLOW + 'TX: 98.4K' + RESET),
-    makeBoxRow('[●] FIREWALL:  ' + BRIGHT_GREEN + 'UFW ACTIVE [Ports: 22, 80]' + RESET),
-    makeBoxRow('[●] TG BOT:    ' + BRIGHT_GREEN + 'CONNECTED [Long-Polling OK]' + RESET),
-    makeBoxRow(DARK_GREEN + '─'.repeat(46) + RESET),
-    makeBoxRow(CYAN + BOLD + '[●] JONLI XAVFSIZLIK VA TIZIM LOGLARI:' + RESET),
-    makeBoxRow(logTimes[0] + ' ' + BRIGHT_GREEN + 'PM2 check: 2/2 services optimal' + RESET),
-    makeBoxRow(logTimes[1] + ' ' + CYAN + 'SSH guard: AES-256 active, 0 err' + RESET),
-    makeBoxRow(logTimes[2] + ' ' + YELLOW + 'Traffic analyzer: 0 threat detected' + RESET),
-    makeBoxRow(logTimes[3] + ' ' + WHITE + 'Heartbeat stream: 1ms [OPTIMAL]' + RESET),
-    GREEN + '└' + '─'.repeat(48) + '┘' + RESET
+    GREEN + '┌──[ ' + WHITE + BOLD + 'TARMOQ VA JONLI MONITORING' + RESET + GREEN + ' ]' + '─'.repeat(24) + '┐' + RESET,
+    makeBoxRow('[●] INTERFACE: ' + WHITE + 'eth0 [1000 Mbps Full-Duplex]' + RESET, 54),
+    makeBoxRow('[●] PACKETS:   ' + CYAN + 'RX: 154.2K' + RESET + ' | ' + YELLOW + 'TX: 98.4K' + RESET, 54),
+    makeBoxRow('[●] FIREWALL:  ' + BRIGHT_GREEN + 'UFW ACTIVE [Ports: 22, 80]' + RESET, 54),
+    makeBoxRow('[●] TG BOT:    ' + BRIGHT_GREEN + 'CONNECTED [Long-Polling OK]' + RESET, 54),
+    makeBoxRow(DARK_GREEN + '─'.repeat(54) + RESET, 54),
+    makeBoxRow(CYAN + BOLD + '[●] JONLI XAVFSIZLIK VA TIZIM LOGLARI:' + RESET, 54),
+    makeBoxRow(logTimes[0] + ' ' + BRIGHT_GREEN + 'PM2 check: 2/2 services optimal' + RESET, 54),
+    makeBoxRow(logTimes[1] + ' ' + CYAN + 'SSH guard: AES-256 active, 0 err' + RESET, 54),
+    makeBoxRow(logTimes[2] + ' ' + YELLOW + 'Traffic analyzer: 0 threat detected' + RESET, 54),
+    makeBoxRow(logTimes[3] + ' ' + WHITE + 'CCTV 4-CH stream: 25.0 FPS [HEALTHY]' + RESET, 54),
+    GREEN + '└' + '─'.repeat(56) + '┘' + RESET
   ];
 
   // 6. Eng pastki Status HUD (1 qator)
-  const footer = GREEN + '══[ ' + BRIGHT_GREEN + BOLD + 'KALI CYBER MONITOR' + RESET + GREEN + ' // ' + CYAN + 'AUTONOMOUS SERVER DEFENSE' + RESET + GREEN + ' // ' + YELLOW + 'TASHKENT (UTC+5)' + RESET + GREEN + ' // ' + WHITE + 'STATUS: OPTIMAL' + RESET + GREEN + ' ]' + '═'.repeat(10) + RESET;
+  const footer = GREEN + '══[ ' + BRIGHT_GREEN + BOLD + 'KALI CYBER MONITOR' + RESET + GREEN + ' // ' + RED + '4-CH LIVE CCTV VIDEO' + RESET + GREEN + ' // ' + YELLOW + 'TASHKENT (UTC+5)' + RESET + GREEN + ' // ' + WHITE + 'ALL SYSTEMS OPERATIONAL' + RESET + GREEN + ' ]' + '═'.repeat(19) + RESET;
 
-  // Barcha qatorlarni birlashtirish (Jami 47 qator!)
+  // Barcha qatorlarni birlashtirish (Jami 46 qator!)
   const allLines = [];
   topBanner.forEach(l => allLines.push(l));
   allLines.push(matrix1);
@@ -332,7 +438,7 @@ function render() {
   allLines.push(matrix2);
 
   for (let i = 0; i < leftTelemetry.length; i++) {
-    allLines.push(leftTelemetry[i] + '  ' + (rightEarthBox[i] || ''));
+    allLines.push(leftTelemetry[i] + '  ' + (cctvBox[i] || ''));
   }
 
   allLines.push(matrix3);
@@ -352,5 +458,5 @@ function render() {
 // Boshlanishida render qilish
 render();
 
-// Har 400ms silliq aylanish
+// Har 400ms silliq jonli animatsiya
 setInterval(render, 400);
