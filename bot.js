@@ -31,9 +31,10 @@ const mainKeyboard = {
   reply_markup: {
     keyboard: [
       ["💻 Buyruq", "📊 Tizim holati"],
+      ["📹 4-CH CCTV Video", "🕶 Hacker Soat"],
       ["⚡️ PM2 jarayonlar", "🔄 IELTS botni yangilash"],
       ["📜 IELTS bot loglari", "🔁 IELTS botni qayta yoqish"],
-      ["🌐 IP manzillar", "🕶 Hacker Soat"]
+      ["🌐 IP manzillar", "ℹ️ Yordam"]
     ],
     resize_keyboard: true
   }
@@ -220,6 +221,14 @@ bot.onText(/\/cmd (.+)/, async (msg, match) => {
   sendLongMessage(msg.chat.id, `💻 <b>NATIJA:</b>\n\n<pre>${result || "Buyruq muvaffaqiyatli bajarildi (hech qanday matn chiqmadi)."}</pre>`);
 });
 
+// --- /cctv (4-CH REAL CCTV MP4 VIDEO DASHBOARD) ---
+async function handleCCTV(chatId) {
+  bot.sendMessage(chatId, "⏳ <i>Monitorda 4-CH Real MP4 Video ochilmoqda...</i>", { parse_mode: 'HTML' });
+  const cmd = "export DISPLAY=:0; export XAUTHORITY=/home/kali/.Xauthority; [ -f /root/.Xauthority ] && export XAUTHORITY=/root/.Xauthority; bash ~/live-server/start_dashboard.sh";
+  await runShellCommand(cmd);
+  bot.sendMessage(chatId, "✅ <b>Monitorda 4-CH Real CCTV Video (MP4) to'liq ekranda ochildi!</b>\n\n📺 Ekranda 4 ta haqiqiy video (ko'cha mashinalari, piyodalar, chorraha, parkovka) va neon soat ko'rinmoqda.", { parse_mode: 'HTML' });
+}
+
 // --- /clock (HACKER SOAT) ---
 function handleClock(chatId) {
   const clockText = `🕶 <b>KALI HACKER SOATI VA MONITORINGI</b>\n\n` +
@@ -292,6 +301,8 @@ bot.on('message', async (msg) => {
     handleRestart(chatId);
   } else if (text === "🌐 IP manzillar") {
     handleIP(chatId);
+  } else if (text === "📹 4-CH CCTV Video") {
+    handleCCTV(chatId);
   } else if (text === "🕶 Hacker Soat") {
     handleClock(chatId);
   } else if (text === "ℹ️ Yordam") {
@@ -308,6 +319,7 @@ bot.onText(/\/restart/, (msg) => { if (isAdmin(msg)) handleRestart(msg.chat.id);
 bot.onText(/\/logs/, (msg) => { if (isAdmin(msg)) handleLogs(msg.chat.id); });
 bot.onText(/\/ip/, (msg) => { if (isAdmin(msg)) handleIP(msg.chat.id); });
 bot.onText(/\/clock/, (msg) => { if (isAdmin(msg)) handleClock(msg.chat.id); });
+bot.onText(/\/cctv/, (msg) => { if (isAdmin(msg)) handleCCTV(msg.chat.id); });
 
 bot.onText(/\/help/, (msg) => {
   if (!isAdmin(msg)) return;
