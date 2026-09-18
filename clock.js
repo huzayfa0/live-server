@@ -1,6 +1,25 @@
 #!/usr/bin/env node
 
 const os = require('os');
+const path = require('path');
+const { exec, spawn } = require('child_process');
+
+// Avtomatik Dashboard Server va Brauzerni ishga tushirish
+try {
+  exec('pgrep -f "node dashboard-server.js"', (err, stdout) => {
+    if (!stdout || !stdout.trim()) {
+      const srv = spawn('node', [path.join(__dirname, 'dashboard-server.js')], {
+        detached: true,
+        stdio: 'ignore'
+      });
+      srv.unref();
+    }
+  });
+
+  const disp = process.env.DISPLAY || ':0';
+  const scriptPath = path.join(__dirname, 'start_dashboard.sh');
+  exec(`DISPLAY=${disp} bash "${scriptPath}" >/dev/null 2>&1 &`);
+} catch (e) {}
 
 // ANSI rang kodlari
 const GREEN = '\x1b[32m';
@@ -158,115 +177,70 @@ function getCpuPercent() {
 // 4 TA CCTV KAMERA MULTIVIEWER (JONLI KO'CHA VA TRANSPORT VEDIOSI)
 // -------------------------------------------------------------
 
-// CAM-01: AMIR TEMUR SHOH KO'CHASI (HARAKATLANUVCHI AVTO OQIMI)
-const roadEast1 = '   __/\\_            .---.            _o__o_          __       ';
-const roadEast2 = '  =(o)(o)=         (o)-(o)          (=)-(==)        (oo)===   ';
-const roadWest1 = '     _o__o_            .---.            __/\\_         _o__o_  ';
-const roadWest2 = '    (=)-(==)          (o)-(o)          =(o)(o)=      (=)-(==) ';
-
 function getCam1(tick, timeStr) {
-  const lenE = roadEast1.length;
-  const offE = (tick * 2) % lenE;
-  const offW = (lenE - ((tick * 2) % lenE)) % lenE;
   const recState = (tick % 2 === 0) ? RED + '● REC' + RESET : DARK_GREEN + '○ REC' + RESET;
-
+  const speed = 45 + (tick % 15);
   return [
     '  ' + BRIGHT_CYAN + BOLD + '[●] CAM-01: SHOH KUCHA' + RESET + ' ' + recState,
-    '  1080p 25FPS ' + WHITE + timeStr + RESET,
-    '  ' + YELLOW + '>> SHARQQA (50 KM/S)' + RESET,
-    '  ' + (roadEast1 + roadEast1).slice(offE, offE + 27),
-    '  ' + (roadEast2 + roadEast2).slice(offE, offE + 27),
-    '  ' + DARK_GREEN + '- - - - - - - - - - - - - -' + RESET,
-    '  ' + (roadWest1 + roadWest1).slice(offW, offW + 27),
-    '  ' + (roadWest2 + roadWest2).slice(offW, offW + 27),
-    '  ' + BRIGHT_GREEN + '[TRAFFIC: NORMAL - 4 CARS]' + RESET
+    '  ' + WHITE + '1080p 30FPS // H.264 HD' + RESET,
+    '  ' + CYAN + 'STREAM: ' + BRIGHT_GREEN + 'ONLINE [4.2 Mbps]' + RESET,
+    '  ' + YELLOW + 'LOC: AMIR TEMUR SHOH KO\'CHA' + RESET,
+    '  ' + WHITE + 'AI TRACK: ' + BRIGHT_GREEN + '14 VEHICLES [OK]' + RESET,
+    '  ' + DARK_GREEN + '---------------------------' + RESET,
+    '  ' + CYAN + 'RADAR SPEED: ' + WHITE + speed + ' KM/H' + RESET,
+    '  ' + BRIGHT_GREEN + '[TRAFFIC FLOW: OPTIMAL]' + RESET,
+    '  ' + WHITE + 'LIVE URL: ' + CYAN + 'localhost:3000' + RESET
   ];
 }
-
-// CAM-02: CHORSU CHORRAHASI (PIYODALAR YO'LAKCHASI VA SVETOFOR)
-const lights = [RED + '[🔴 QIZIL ]' + RESET, YELLOW + '[🟡 SARIQ ]' + RESET, BRIGHT_GREEN + '[🟢 YASHIL]' + RESET];
-const pedStrip1 = '    o       o       o       o       o       o    ';
-const p2rawA = '   /|\\     /|      /|\\     <|>     /|      /|\\   ';
-const p2rawB = '   <|>     /|\\     <|>     /|      /|\\     <|>   ';
-const p3rawA = '   / \\     / |     / \\      |      / \\     / |   ';
-const p3rawB = '   | \\     / \\     | \\     / \\     | \\     / \\   ';
 
 function getCam2(tick, timeStr) {
-  const curLight = lights[Math.floor((tick % 9) / 3)];
-  const offP = (tick * 2) % pedStrip1.length;
-  const p1 = (pedStrip1 + pedStrip1).slice(offP, offP + 27);
-  const p2raw = (tick % 2 === 0) ? p2rawA : p2rawB;
-  const p2 = (p2raw + p2raw).slice(offP, offP + 27);
-  const p3raw = (tick % 2 === 0) ? p3rawA : p3rawB;
-  const p3 = (p3raw + p3raw).slice(offP, offP + 27);
   const recState = (tick % 2 === 0) ? RED + '● REC' + RESET : DARK_GREEN + '○ REC' + RESET;
-
-  const isRed = Math.floor((tick % 9) / 3) === 0;
-  const carWait = isRed 
-    ? YELLOW + '[AVTO KUTMOQDA]' + RESET + ' _o_ (o-o)'
-    : BRIGHT_GREEN + '[AVTO O\'TMOQDA]' + RESET + ' >>> __/\\_';
-
+  const lights = [RED + 'QIZIL' + RESET, YELLOW + 'SARIQ' + RESET, BRIGHT_GREEN + 'YASHIL' + RESET];
+  const curLight = lights[Math.floor((tick % 9) / 3)];
   return [
     '  ' + BRIGHT_CYAN + BOLD + '[●] CAM-02: PIYODALAR' + RESET + '  ' + recState,
-    '  1080p 25FPS ' + WHITE + timeStr + RESET,
-    '  ' + curLight + '   💡   💡   💡',
-    '  ' + p1,
-    '  ' + p2,
-    '  ' + p3,
-    '  ' + WHITE + ' ═══  ═══  ═══  ═══  ═══ ' + RESET,
-    '  ' + carWait,
-    '  ' + CYAN + '[PIYODALAR: 6 HARAKATDA]' + RESET
+    '  ' + WHITE + '1080p 30FPS // H.264 HD' + RESET,
+    '  ' + CYAN + 'STREAM: ' + BRIGHT_GREEN + 'ONLINE [3.8 Mbps]' + RESET,
+    '  ' + YELLOW + 'LOC: CHORSU CHORRAHASI' + RESET,
+    '  ' + WHITE + 'AI TRACK: ' + CYAN + '8 PEDESTRIANS [OK]' + RESET,
+    '  ' + DARK_GREEN + '---------------------------' + RESET,
+    '  ' + WHITE + 'SVETOFOR: [' + curLight + WHITE + ']' + RESET,
+    '  ' + BRIGHT_GREEN + '[CROSSWALK: SAFE (ZEBRA)]' + RESET,
+    '  ' + WHITE + 'LIVE URL: ' + CYAN + 'localhost:3000' + RESET
   ];
 }
 
-// CAM-03: KIRISH DARVOZASI (SHLAGBAUM VA AVTO TEKSHIRUV)
 function getCam3(tick, timeStr) {
-  const isOpen = (Math.floor(tick / 4) % 2 === 0);
-  const barrier = isOpen 
-    ? BRIGHT_GREEN + '[SHLAGBAUM: OCHIQ]' + RESET + '   \\    ' 
-    : RED + '[SHLAGBAUM: YOPUK]' + RESET + '  ──────';
-  
-  const carPos = (tick % 6) * 3;
-  const c3_1 = (' '.repeat(carPos) + ' __/\\_ ').slice(0, 27);
-  const c3_2 = (' '.repeat(carPos) + '=(o)(o)=').slice(0, 27);
+  const recState = (tick % 2 === 0) ? RED + '● REC' + RESET : DARK_GREEN + '○ REC' + RESET;
   const plates = ['01|A777AA', '01|B123BB', '01|Z999ZZ', '01|M555MM'];
   const plate = plates[Math.floor(tick / 6) % plates.length];
-  const recState = (tick % 2 === 0) ? RED + '● REC' + RESET : DARK_GREEN + '○ REC' + RESET;
-
   return [
     '  ' + BRIGHT_CYAN + BOLD + '[●] CAM-03: KIRISH' + RESET + '     ' + recState,
-    '  1080p 25FPS ' + WHITE + timeStr + RESET,
-    '  ' + CYAN + '[NAZORAT]' + RESET + '   o/  ' + YELLOW + '[QOROVUL]' + RESET,
-    '  ' + barrier,
-    '  ' + c3_1,
-    '  ' + c3_2,
-    '  ' + DARK_GREEN + '═══════════════════════════' + RESET,
-    '  ' + CYAN + '[SCAN: ' + WHITE + plate + CYAN + ']' + RESET + ' ' + BRIGHT_GREEN + '[OK]' + RESET,
-    '  ' + BRIGHT_GREEN + '[RUXSAT: TASDIQLANDI - 100%]' + RESET
+    '  ' + WHITE + '1080p 30FPS // H.264 HD' + RESET,
+    '  ' + CYAN + 'STREAM: ' + BRIGHT_GREEN + 'ONLINE [4.0 Mbps]' + RESET,
+    '  ' + YELLOW + 'LOC: ASOSIY DARVOZA' + RESET,
+    '  ' + WHITE + 'ANPR SCAN: ' + BRIGHT_GREEN + plate + RESET,
+    '  ' + DARK_GREEN + '---------------------------' + RESET,
+    '  ' + CYAN + 'SHLAGBAUM: ' + BRIGHT_GREEN + '[OCHIQ / PASS]' + RESET,
+    '  ' + BRIGHT_GREEN + '[XAVFSIZLIK: RUXSAT ETILDI]' + RESET,
+    '  ' + WHITE + 'LIVE URL: ' + CYAN + 'localhost:3000' + RESET
   ];
 }
 
-// CAM-04: AVTO TURARGOH (PARKOVKA VA HARAKAT SENSORI)
-const radarIcons = ['[RADAR: ◴ ]', '[RADAR: ◷ ]', '[RADAR: ◶ ]', '[RADAR: ◵ ]'];
-
 function getCam4(tick, timeStr) {
-  const rIcon = radarIcons[tick % 4];
-  const pedX = (tick * 3) % 18;
-  const p4_1 = (' '.repeat(pedX) + '  o   ' + YELLOW + '[HAYDOVCHI]' + RESET).slice(0, 37);
-  const p4_2 = (' '.repeat(pedX) + ' /|\\').slice(0, 27);
-  const p4_3 = (' '.repeat(pedX) + ' / \\').slice(0, 27);
   const recState = (tick % 2 === 0) ? RED + '● REC' + RESET : DARK_GREEN + '○ REC' + RESET;
-
+  const radarIcons = ['[RADAR: ◴ ]', '[RADAR: ◷ ]', '[RADAR: ◶ ]', '[RADAR: ◵ ]'];
+  const rIcon = radarIcons[tick % 4];
   return [
     '  ' + BRIGHT_CYAN + BOLD + '[●] CAM-04: TURARGOH' + RESET + '   ' + recState,
-    '  1080p 25FPS ' + WHITE + timeStr + RESET,
-    '  ' + WHITE + '| P1:o=o | P2:o=o | P3:BOSH |' + RESET,
-    '  ' + p4_1,
-    '  ' + p4_2,
-    '  ' + p4_3,
+    '  ' + WHITE + '1080p 30FPS // NIGHT-VISION' + RESET,
+    '  ' + CYAN + 'STREAM: ' + BRIGHT_GREEN + 'ONLINE [3.5 Mbps]' + RESET,
+    '  ' + YELLOW + 'LOC: AVTO PARKOVKA' + RESET,
+    '  ' + CYAN + rIcon + ' ' + WHITE + 'BO\'SH: ' + BRIGHT_GREEN + '14' + RESET + ' / ' + WHITE + '36' + RESET,
     '  ' + DARK_GREEN + '---------------------------' + RESET,
-    '  ' + CYAN + rIcon + RESET + ' BO\'SH: ' + BRIGHT_GREEN + '14' + RESET + ' / ' + WHITE + '36' + RESET,
-    '  ' + YELLOW + '[XAVFSIZLIK: SHUBHA YO\'Q]' + RESET
+    '  ' + WHITE + 'SENSOR: ' + BRIGHT_GREEN + 'INFRARED DETECT [OK]' + RESET,
+    '  ' + BRIGHT_GREEN + '[XAVFSIZLIK: SHUBHA YO\'Q]' + RESET,
+    '  ' + WHITE + 'LIVE URL: ' + CYAN + 'localhost:3000' + RESET
   ];
 }
 

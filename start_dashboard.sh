@@ -20,15 +20,21 @@ fi
 
 URL="http://localhost:3000"
 
+export DISPLAY="${DISPLAY:-:0}"
+export XAUTHORITY="${XAUTHORITY:-$HOME/.Xauthority}"
+[ -f /root/.Xauthority ] && [ "$USER" = "root" ] && export XAUTHORITY=/root/.Xauthority
+
 # 2. To'liq ekranda (Kiosk) brauzerni ishga tushirish
-echo "[*] Brauzer to'liq ekranda ochilmoqda..."
+echo "[*] Brauzer to'liq ekranda ($DISPLAY) ochilmoqda..."
+
+CHROME_FLAGS="--no-sandbox --test-type --kiosk --noerrdialogs --disable-infobars --check-for-update-interval=31536000 --autoplay-policy=no-user-gesture-required --disable-features=Translate"
 
 if command -v chromium >/dev/null 2>&1; then
-    chromium --kiosk --noerrdialogs --disable-infobars --autoplay-policy=no-user-gesture-required "$URL" >/dev/null 2>&1 &
+    chromium $CHROME_FLAGS "$URL" >/dev/null 2>&1 &
 elif command -v chromium-browser >/dev/null 2>&1; then
-    chromium-browser --kiosk --noerrdialogs --disable-infobars --autoplay-policy=no-user-gesture-required "$URL" >/dev/null 2>&1 &
+    chromium-browser $CHROME_FLAGS "$URL" >/dev/null 2>&1 &
 elif command -v google-chrome >/dev/null 2>&1; then
-    google-chrome --kiosk --noerrdialogs --disable-infobars --autoplay-policy=no-user-gesture-required "$URL" >/dev/null 2>&1 &
+    google-chrome $CHROME_FLAGS "$URL" >/dev/null 2>&1 &
 elif command -v firefox >/dev/null 2>&1; then
     firefox --kiosk "$URL" >/dev/null 2>&1 &
 else
