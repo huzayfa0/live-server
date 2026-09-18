@@ -16,6 +16,7 @@ const bot = new TelegramBot(token, { polling: true });
 
 // Buyruqlar menyusi
 bot.setMyCommands([
+  { command: '/terminal', description: '💻 Terminal rejimi (Buyruq yuborish)' },
   { command: '/status', description: '📊 Tizim va server holati' },
   { command: '/pull', description: '🔄 IELTS botni yangilash (Git pull)' },
   { command: '/pm2', description: '⚡️ PM2 jarayonlar ro‘yxati' },
@@ -29,14 +30,16 @@ bot.setMyCommands([
 const mainKeyboard = {
   reply_markup: {
     keyboard: [
-      ["📊 Tizim holati", "🔄 IELTS botni yangilash"],
-      ["⚡️ PM2 jarayonlar", "📜 IELTS bot loglari"],
-      ["🔁 IELTS botni qayta yoqish", "🌐 IP manzillar"],
-      ["🕶 Hacker Soat", "ℹ️ Yordam"]
+      ["💻 Buyruq", "📊 Tizim holati"],
+      ["⚡️ PM2 jarayonlar", "🔄 IELTS botni yangilash"],
+      ["📜 IELTS bot loglari", "🔁 IELTS botni qayta yoqish"],
+      ["🌐 IP manzillar", "🕶 Hacker Soat"]
     ],
     resize_keyboard: true
   }
 };
+
+const userModes = {};
 
 // Admin tekshiruvi funksiyasi
 function isAdmin(msg) {
@@ -49,8 +52,9 @@ function isAdmin(msg) {
 
 // Shell buyrug'ini bajarish yordamchisi
 function runShellCommand(cmd, timeoutMs = 30000) {
+  const defaultCwd = process.env.HOME || process.cwd();
   return new Promise((resolve) => {
-    exec(cmd, { timeout: timeoutMs, maxBuffer: 1024 * 1024 }, (error, stdout, stderr) => {
+    exec(cmd, { cwd: defaultCwd, timeout: timeoutMs, maxBuffer: 1024 * 1024 }, (error, stdout, stderr) => {
       let output = stdout || stderr || '';
       if (error && !output) {
         output = `Xatolik yuz berdi: ${error.message}`;
@@ -221,11 +225,35 @@ function handleClock(chatId) {
   const clockText = `🕶 <b>KALI HACKER SOATI VA MONITORINGI</b>\n\n` +
     `Ushbu animatsiyali hacker soatini Kali serveringiz ekraniga qo‘yish uchun:\n\n` +
     `🖥 <b>1. Kali terminalida shunchaki quyidagi buyruqni bering:</b>\n` +
-    `<code>node ~/server-bot/clock.js</code>\n\n` +
+    `<code>node ~/live-server/clock.js</code>\n\n` +
     `🟢 Ekranda katta yashil raqamlar, Matrix animatsiyasi, real-vaqtdagi RAM va Uptime monitori yonib turadi!\n\n` +
     `⌨️ <b>Chiqish:</b> Serverda ishlash kerak bo‘lsa, shunchaki <b>Ctrl + C</b> tugmasini bossangiz, terminal darhol o‘z holiga qaytadi!`;
 
   bot.sendMessage(chatId, clockText, { parse_mode: 'HTML' });
+}
+
+// --- TERMINAL REJIMI (BUYRUQ) ---
+function enterTerminalMode(chatId) {
+  userModes[chatId] = 'TERMINAL';
+  const text = `💻 <b>KALI TERMINAL REJIMI YOQILDI</b>\n\n` +
+    `Endi Kali Linux terminalida bajarmoqchi bo‘lgan istalgan buyrug‘ingizni to‘g‘ridan-to‘g‘ri yozing va jo‘nating!\n\n` +
+    `Masalan:\n` +
+    `• <code>ls -la</code>\n` +
+    `• <code>uptime</code>\n` +
+    `• <code>df -h</code>\n` +
+    `• <code>free -m</code>\n` +
+    `• <code>pm2 status</code>\n` +
+    `• <code>ip a</code>\n` +
+    `• <code>node -v</code>\n\n` +
+    `❌ Chiqish uchun: pastdagi <b>«❌ Chiqish»</b> tugmasini bosing.`;
+
+  bot.sendMessage(chatId, text, {
+    parse_mode: 'HTML',
+    reply_markup: {
+      keyboard: [["❌ Chiqish"]],
+      resize_keyboard: true
+    }
+  });
 }
 
 // --- TEXT TUGMALARNI QABUL QILISH ---
@@ -236,7 +264,23 @@ bot.on('message', async (msg) => {
 
   const chatId = msg.chat.id;
 
-  if (text === "📊 Tizim holati") {
+  if (text === "❌ Chiqish") {
+    userModes[chatId] = null;
+    bot.sendMessage(chatId, "✅ Terminal rejimidan chiqildi. Asosiy menyu:", mainKeyboard);
+    return;
+  }
+
+  // Agar foydalanuvchi TERMINAL rejimida bo'lsa:
+  if (userModes[chatId] === 'TERMINAL') {
+    bot.sendMessage(chatId, `⏳ <i>Bajarilmoqda:</i> <code>${text}</code>`, { parse_mode: 'HTML' });
+    const result = await runShellCommand(text, 60000);
+    await sendLongMessage(chatId, `💻 <b>NATIJA:</b>\n\n<pre>${result || "Buyruq muvaffaqiyatli bajarildi (hech qanday xabar chiqmadi)."}</pre>`);
+    return;
+  }
+
+  if (text === "💻 Buyruq") {
+    enterTerminalMode(chatId);
+  } else if (text === "📊 Tizim holati") {
     handleStatus(chatId);
   } else if (text === "🔄 IELTS botni yangilash") {
     handleGitPull(chatId);
@@ -256,6 +300,7 @@ bot.on('message', async (msg) => {
 });
 
 // Slash buyruqlar ulanishi
+bot.onText(/\/terminal/, (msg) => { if (isAdmin(msg)) enterTerminalMode(msg.chat.id); });
 bot.onText(/\/status/, (msg) => { if (isAdmin(msg)) handleStatus(msg.chat.id); });
 bot.onText(/\/pull/, (msg) => { if (isAdmin(msg)) handleGitPull(msg.chat.id); });
 bot.onText(/\/pm2/, (msg) => { if (isAdmin(msg)) handlePM2Status(msg.chat.id); });
@@ -267,6 +312,7 @@ bot.onText(/\/clock/, (msg) => { if (isAdmin(msg)) handleClock(msg.chat.id); });
 bot.onText(/\/help/, (msg) => {
   if (!isAdmin(msg)) return;
   const helpText = `ℹ️ <b>KALI CONTROLLER BUYRUQLARI:</b>\n\n` +
+    `• <b>💻 Buyruq</b> (/terminal) — Terminal rejimiga kirish va buyruq yuborish\n` +
     `• <b>📊 Tizim holati</b> (/status) — CPU, RAM, disk, bot holati\n` +
     `• <b>🔄 IELTS botni yangilash</b> (/pull) — Git pull qilib, botni yangi kod bilan qayta yoqadi\n` +
     `• <b>⚡️ PM2 jarayonlar</b> (/pm2) — pm2 status jadvali\n` +
@@ -274,7 +320,7 @@ bot.onText(/\/help/, (msg) => {
     `• <b>📜 Loglar</b> (/logs) — Xatolik va loglarni ko‘rish\n` +
     `• <b>🌐 IP manzillar</b> (/ip) — Lokal va global IP\n` +
     `• <b>🕶 Hacker Soat</b> (/clock) — Kali monitoriga hacker soatini qo‘yish\n` +
-    `• <b>💻 /cmd &lt;buyruq&gt;</b> — Kali terminalida xohlagan buyruqni bajarish (masalan: <code>/cmd whoami</code> yoki <code>/cmd df -h</code>)`;
+    `• <b>💻 /cmd &lt;buyruq&gt;</b> — Bitta alohida terminal buyrug‘ini bajarish`;
 
   bot.sendMessage(msg.chat.id, helpText, { parse_mode: 'HTML', ...mainKeyboard });
 });
