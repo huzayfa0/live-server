@@ -28,32 +28,58 @@ fi
 URL="http://localhost:3000"
 
 # 2. To'liq ekranda (Kiosk) brauzerni ishga tushirish
-echo "[*] Brauzer to'liq ekranda ($DISPLAY) ochilmoqda..."
-
 CHROME_FLAGS="--no-sandbox --test-type --kiosk --noerrdialogs --disable-infobars --check-for-update-interval=31536000 --autoplay-policy=no-user-gesture-required --disable-features=Translate"
 
+# Qaysi brauzer mavjudligini aniqlash
+BIN=""
 if command -v firefox-esr >/dev/null 2>&1; then
-    echo "[+] Kali Linux Firefox-ESR aniqlandi, to'liq ekranda ochilmoqda..."
-    firefox-esr --kiosk "$URL" >/dev/null 2>&1 &
+    BIN="firefox-esr"
+    LAUNCH="firefox-esr --kiosk $URL"
 elif command -v chromium >/dev/null 2>&1; then
-    echo "[+] Chromium aniqlandi, to'liq ekranda ochilmoqda..."
-    chromium $CHROME_FLAGS "$URL" >/dev/null 2>&1 &
+    BIN="chromium"
+    LAUNCH="chromium $CHROME_FLAGS $URL"
 elif command -v chromium-browser >/dev/null 2>&1; then
-    echo "[+] Chromium-browser aniqlandi, to'liq ekranda ochilmoqda..."
-    chromium-browser $CHROME_FLAGS "$URL" >/dev/null 2>&1 &
+    BIN="chromium-browser"
+    LAUNCH="chromium-browser $CHROME_FLAGS $URL"
 elif command -v firefox >/dev/null 2>&1; then
-    echo "[+] Firefox aniqlandi, to'liq ekranda ochilmoqda..."
-    firefox --kiosk "$URL" >/dev/null 2>&1 &
+    BIN="firefox"
+    LAUNCH="firefox --kiosk $URL"
 elif command -v google-chrome >/dev/null 2>&1; then
-    echo "[+] Google Chrome aniqlandi, to'liq ekranda ochilmoqda..."
-    google-chrome $CHROME_FLAGS "$URL" >/dev/null 2>&1 &
+    BIN="google-chrome"
+    LAUNCH="google-chrome $CHROME_FLAGS $URL"
 elif command -v x-www-browser >/dev/null 2>&1; then
-    echo "[+] Tizim brauzeri (x-www-browser) ochilmoqda..."
-    x-www-browser "$URL" >/dev/null 2>&1 &
-elif command -v xdg-open >/dev/null 2>&1; then
-    xdg-open "$URL" >/dev/null 2>&1 &
+    BIN="x-www-browser"
+    LAUNCH="x-www-browser $URL"
+fi
+
+if [ -z "$BIN" ]; then
+    echo "[-] Brauzer topilmadi! O'rnatish: sudo apt update && sudo apt install -y firefox-esr"
+    exit 1
+fi
+
+echo "[*] Brauzer aniqlandi: $BIN"
+
+# A) Agar grafik tizim (X11) allaqachon ishlab turgan bo'lsa:
+if xset q >/dev/null 2>&1 || [ -n "$DISPLAY" -a "$DISPLAY" != ":0" ]; then
+    echo "[+] Grafik tizim faol ($DISPLAY). Brauzer ochilmoqda..."
+    $LAUNCH >/dev/null 2>&1 &
+    echo "[✓] Dashboard ochildi!"
+    exit 0
+fi
+
+# B) Agar TTY konsol rejimida bo'lsa (DISPLAY bo'lmasa):
+if command -v xinit >/dev/null 2>&1; then
+    echo "[+] Konsol rejimi aniqlandi. xinit orqali to'liq ekranli Kiosk ishga tushirilmoqda..."
+    xinit $(command -v $BIN) --kiosk "$URL" -- :0 >/dev/null 2>&1
+    exit 0
+elif command -v startx >/dev/null 2>&1; then
+    echo "[+] startx orqali grafik tizim ishga tushirilmoqda..."
+    startx
+    exit 0
 else
-    echo "[-] Brauzer topilmadi! Iltimos quyidagini o'rnating: sudo apt update && sudo apt install -y firefox-esr"
+    # Fallback: DISPLAY=:0 deb sinab ko'rish
+    export DISPLAY=:0
+    $LAUNCH >/dev/null 2>&1 &
 fi
 
 echo "[✓] Dashboard muvaffaqiyatli ishga tushdi!"
